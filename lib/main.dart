@@ -1,0 +1,94 @@
+import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; 
+import 'firebase_options.dart';
+
+import 'services/database_service.dart';
+import 'screens/login_screen.dart';
+import 'screens/onboarding_screen.dart';
+import 'screens/chat_screen.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'OrientAI',
+      theme: ThemeData(
+        primarySwatch: Colors.indigo,
+        useMaterial3: true,
+      ),
+      home: const AuthWrapper(),
+    );
+  }
+}
+
+class AuthWrapper extends StatelessWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final dbService = DatabaseService();
+
+    return StreamBuilder<User?>(
+      stream: dbService.authStateChanges,
+      builder: (context, snapshot) {
+        
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+        }
+
+        if (snapshot.hasData) {
+          final user = snapshot.data!;
+          
+          // --- MODIFICA REATTIVA ---
+          // Invece di chiedere i dati una volta sola (Future), ascoltiamo i cambiamenti (Stream).
+          // Usiamo direttamente Firestore qui per semplicità, ma potresti metterlo nel service.
+          return StreamBuilder<DocumentSnapshot>(
+            stream: FirebaseFirestore.instance.collection('users').doc(user.uid).snapshots(),
+            builder: (context, profileSnapshot) {
+              
+              if (profileSnapshot.connectionState == ConnectionState.waiting) {
+                return const Scaffold(body: Center(child: CircularProgressIndicator()));
+              }
+
+              // Controlliamo se il documento esiste e ha i dati necessari
+              if (profileSnapshot.hasData && profileSnapshot.data!.exists) {
+                final data = profileSnapshot.data!.data() as Map<String, dynamic>;
+                
+                // Verifica se il profilo è completo (ha il nome)
+                if (data.containsKey('name') && 
+                    data['name'] != null && 
+                    data['name'].toString().isNotEmpty) {
+                  
+                  bool isPremium = data['isPremium'] ?? false;
+                  
+                  // Se il profilo è completo, il Main mostra AUTOMATICAMENTE la Chat.
+                  return ChatScreen(
+                    studentName: data['name'],
+                    interests: data['interests'] ?? '',
+                    schoolType: data['school'] ?? '',
+                    isPremium: isPremium,
+                  );
+                }
+              }
+
+              // Se i dati mancano o il documento non esiste -> Onboarding
+              return const OnboardingScreen();
+            },
+          );
+        }
+
+        return const LoginScreen();
+      },
+    );
+  }
+}

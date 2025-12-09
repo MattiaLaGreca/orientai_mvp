@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "16533015766",
+    "project_id": "orientai-mvp",
+    "storage_bucket": "orientai-mvp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:16533015766:android:901854f0f8d8d1bf2b8d77",
+        "android_client_info": {
+          "package_name": "com.example.orientai_mvp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0lSCUT8VFwkJkzubzmCpqbw55KORfI3U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

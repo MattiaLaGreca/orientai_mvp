@@ -1,0 +1,87 @@
+import 'package:google_generative_ai/google_generative_ai.dart';
+
+class OrientAIService {
+  // ⚠️ IMPORTANTE: Assicurati che qui ci sia la tua API KEY corretta!
+  static const String _apiKey = 'AIzaSyBt_wsahkY3p3yWZz2GQ9j7YvrDJ2QGp3A';
+  
+  late final GenerativeModel _model;
+  late final ChatSession _chat;
+
+  // MODIFICA: Ora init accetta isPremium
+  void init(String studentName, String promptDetails, List<Map<String, dynamic>> chatHistory, bool isPremium) {
+    
+    final modelName = isPremium ? 'gemini-2.5-flash' : 'gemini-2.5-flash-lite';
+    final chatSummary = summarizeChat(
+      isPremium, 
+      chatHistory.map((entry) => "${entry['role']}: ${entry['content']}").join("\n")
+    );
+
+    print("DEBUG: Inizializzo AI con modello $modelName (Premium: $isPremium)");
+
+    _model = GenerativeModel(
+      model: modelName, 
+      apiKey: _apiKey,
+      systemInstruction: Content.system('''
+        Sei OrientAI, un esperto orientatore scolastico italiano.
+        Non ti occuperai di altro se non di aiutare studenti a scegliere il loro percorso futuro che implichi continuare gli studii o lavorare.
+        Stai parlando con $studentName.
+        $promptDetails.
+
+        ${isPremium ? "L'utente ha un account premium, non fare risposte troppo prolisse e lente, sii veloce e mettici la cura che ci vuole per un utente pagante" : "L'utente ha un account gratuito, quindi sii conciso e veloce nelle risposte."}
+        
+        Usa anche elenchi puntati e formattazione markdown.
+        Cerca di capire la personalità dell'utente dalle sue risposte e adatta i tuoi consigli. Se serve fai anche una sorta di test di personalità.
+        Prova a capire se essere giocoso o serio in base a come si comporta l'utente. Puoi usare emoji oppure no.
+        Basati anche sulla grammatica e sugli errori che fa l'utente per capire il suo livello di istruzione e adatta il tuo linguaggio.
+        Fornisci sempre consigli pratici e concreti, non essere mai vago.
+      '''),
+    );
+
+    _chat = _model.startChat();
+    sendMessage(chatSummary.toString());
+  }
+
+  Future<String> sendMessage(String message) async {
+    try {
+      final response = await _chat.sendMessage(Content.text(message));
+      return response.text ?? "Non ho capito, puoi ripetere?";
+    } catch (e) {
+      return "Errore AI: $e";
+    }
+  }
+
+  Future<String> sendMessageWithStreaming(String message, void Function(String) onPartialResponse) async {
+    String fullResponse = '';
+    try {
+      await for (final chunk in _chat.sendMessageStream(Content.text(message))) {
+        if (chunk.text != null) {
+          fullResponse += chunk.text!;
+          onPartialResponse(fullResponse);
+        }
+      }
+      return fullResponse;
+    } catch (e) {
+      return "Errore AI: $e";
+    }
+  }
+
+  Future<String> summarizeChat(bool isPremium, String chatHistory) async {
+    try {
+      final summarizer = GenerativeModel(
+        model: isPremium ? 'gemini-2.5-pro' : 'gemini-2.5-flash-lite',
+        apiKey: _apiKey,
+        systemInstruction: Content.system('''
+          Riceverai alcuni messaggi di una chat tra uno studente e OrientAi, un bot specializzato in orientamento scolastico italiano.
+          Dovrai riassumere il topic della chat, fare una sorta di profilo con tratti psicologici, propensioni e pattern dell'utente.
+          La tua risposta verrà fornita direttamente ad OrientAi come punto di ripristino della chat e costituirà il prompt per il suo primo messaggio appena l'utente tornerà nella chat.
+          Fornisci la risposta il più breve possibile per risparimiare token, ma senza perdere informazioni importanti.
+          Scrivi come pensi sia meglio per farti capire dall'AI, non è un requisto che un umano lo comprenda.
+        '''),
+      );
+      final chatSummary = await summarizer.startChat().sendMessage(Content.text(chatHistory));
+      return chatSummary.text ?? "Nessun sommario disponibile.";
+    } catch (e) {
+      return "Errore nel sommario: $e";
+    }
+  }
+}
