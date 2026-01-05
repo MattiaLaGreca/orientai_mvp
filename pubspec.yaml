@@ -22,6 +22,7 @@ dependencies:
   google_generative_ai: ^0.4.6
   flutter_markdown: ^0.7.7+1
   google_mobile_ads: ^6.0.0
+  flutter_dotenv: ^5.2.1
   # ---------------------------------------
 dev_dependencies:
   flutter_test:
@@ -30,3 +31,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - .env

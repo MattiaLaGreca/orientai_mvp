@@ -1,8 +1,15 @@
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class OrientAIService {
   // ⚠️ IMPORTANTE: Assicurati che qui ci sia la tua API KEY corretta!
-  static const String _apiKey = 'AIzaSyBt_wsahkY3p3yWZz2GQ9j7YvrDJ2QGp3A';
+  static String get _apiKey {
+    final key = dotenv.env['GEMINI_API_KEY'];
+    if (key == null || key.isEmpty) {
+      throw Exception('GEMINI_API_KEY not found in .env');
+    }
+    return key;
+  }
   
   late final GenerativeModel _model;
   late final ChatSession _chat;
