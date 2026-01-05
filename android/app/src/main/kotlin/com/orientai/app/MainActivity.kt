@@ -1,4 +1,4 @@
-package com.example.orientai_mvp
+package com.orientai.app
 
 import io.flutter.embedding.android.FlutterActivity
 

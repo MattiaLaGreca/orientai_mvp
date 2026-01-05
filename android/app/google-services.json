@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:16533015766:android:901854f0f8d8d1bf2b8d77",
         "android_client_info": {
-          "package_name": "com.example.orientai_mvp"
+          "package_name": "com.orientai.app"
         }
       },
       "oauth_client": [],
