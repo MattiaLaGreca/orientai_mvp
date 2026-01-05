@@ -112,7 +112,10 @@ class DatabaseService {
   Future<void> sendMessage(String text, bool isUser) async {
     final user = _auth.currentUser;
     if (user == null) return;
-
+    // if (freeCounter == freeLimit) {
+    //  throw Exception("Limite di messaggi gratuiti raggiunto.");
+    // }
+    // freeCounter++;
     await _db
         .collection('users')
         .doc(user.uid)
@@ -124,7 +127,7 @@ class DatabaseService {
     });
   }
 
-  Stream<QuerySnapshot> getMessagesStream() {
+  Stream<QuerySnapshot> getMessagesStream(bool isPremium) {
     final user = _auth.currentUser;
     if (user == null) return const Stream.empty();
 
@@ -134,6 +137,9 @@ class DatabaseService {
         .collection('messages')
         .orderBy('createdAt', descending: true);
 
+    if (!isPremium) {
+      query.limit(10);
+    }
     return query.snapshots();
   }
 

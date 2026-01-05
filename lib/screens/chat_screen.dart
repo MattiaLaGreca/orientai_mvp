@@ -3,6 +3,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/ai_service.dart';
 import '../services/database_service.dart';
+import 'profile_screen.dart';
 
 class ChatScreen extends StatefulWidget {
   final String studentName;
@@ -144,12 +145,12 @@ class _ChatScreenState extends State<ChatScreen> {
               children: [
                 Expanded(
                   child: StreamBuilder<QuerySnapshot>(
-                    stream: _dbService.getMessagesStream(),
+                    stream: _dbService.getMessagesStream(widget.isPremium),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
                       }
-                      
+
                       final docs = snapshot.data!.docs;
 
                       return ListView.builder(
