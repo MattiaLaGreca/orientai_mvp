@@ -41,10 +41,14 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _initChat() async {
-    // Recupera la cronologia dal DB (metodo aggiunto al punto A)
-    String promptDetails = "Interessi: ${widget.interests}; Frequenta: ${widget.schoolType}";
-    List<Map<String, dynamic>> chatHistory = await _dbService.getChatHistoryForAI(); 
-    String previousSummary = await _dbService.getSummary();
+    // Parallelize data fetching
+    final results = await Future.wait([
+      _dbService.getChatHistoryForAI(),
+      _dbService.getSummary(),
+    ]);
+
+    List<Map<String, dynamic>> chatHistory = results[0] as List<Map<String, dynamic>>;
+    String previousSummary = results[1] as String;
     
     if (previousSummary.isNotEmpty) {
       chatHistory.insert(0, {
@@ -53,14 +57,21 @@ class _ChatScreenState extends State<ChatScreen> {
       });
     }
 
+    String promptDetails = "Interessi: ${widget.interests}; Frequenta: ${widget.schoolType}";
+
     // Inizializza l'AI con la cronologia reale
     _aiService.init(widget.studentName, promptDetails, widget.isPremium);
     
     String summary = await _aiService.summarizeChat(widget.isPremium, chatHistory);
-    await _dbService.saveSummary("Sommario Chat:\n$summary");
     print("DEBUG: Sommario Chat Iniziale:\n$summary");
 
-    fullResponse = await _aiService.sendMessage(summary);
+    // Parallelize sending message to AI and saving summary
+    final aiResults = await Future.wait([
+      _aiService.sendMessage(summary),
+      _dbService.saveSummary("Sommario Chat:\n$summary"),
+    ]);
+
+    fullResponse = aiResults[0] as String;
     await _dbService.sendMessage(fullResponse, false);
     
     if (mounted) {
