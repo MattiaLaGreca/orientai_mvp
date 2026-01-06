@@ -23,16 +23,46 @@ class _LoginScreenState extends State<LoginScreen> {
       _errorMessage = null;
     });
 
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    // 🔒 Sentinel Security Check: Input Validation
+    if (email.isEmpty || password.isEmpty) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = "Inserisci email e password.";
+      });
+      return;
+    }
+
+    // Use a more permissive regex to support modern TLDs and aliases
+    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+    if (!emailRegex.hasMatch(email)) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = "Inserisci un'email valida.";
+      });
+      return;
+    }
+
+    if (!_isLogin && password.length < 6) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = "La password deve avere almeno 6 caratteri.";
+      });
+      return;
+    }
+
     try {
       if (_isLogin) {
         await _dbService.signIn(
-          _emailController.text.trim(),
-          _passwordController.text.trim(),
+          email,
+          password,
         );
       } else {
         await _dbService.signUp(
-          _emailController.text.trim(),
-          _passwordController.text.trim(),
+          email,
+          password,
         );
       }
       // Se va tutto bene, il main.dart rileverà il cambio di stato e cambierà schermata
