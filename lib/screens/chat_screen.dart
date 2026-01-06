@@ -26,18 +26,26 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  final ValueNotifier<String> _streamedResponseNotifier = ValueNotifier("");
   final OrientAIService _aiService = OrientAIService();
   final DatabaseService _dbService = DatabaseService();
   
   bool _isAiTyping = true;
   bool _isInitializing = true;
-  String _streamedResponse = "";
   String fullResponse = "";
 
   @override
   void initState() {
     super.initState();
     _initChat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _scrollController.dispose();
+    _streamedResponseNotifier.dispose();
+    super.dispose();
   }
 
   Future<void> _initChat() async {
@@ -91,17 +99,15 @@ class _ChatScreenState extends State<ChatScreen> {
     // Salva messaggio UTENTE
     await _dbService.sendMessage(text, true);
     
+    _streamedResponseNotifier.value = "";
     setState(() {
       _isAiTyping = true;
-      _streamedResponse = "";
     });
     
     if (widget.isPremium) {
       fullResponse = await _aiService.sendMessageWithStreaming(text, (chunk) {
         if (mounted) {
-          setState(() {
-            _streamedResponse = chunk; // Aggiorna UI in tempo reale
-          });
+          _streamedResponseNotifier.value = chunk; // Aggiorna UI in tempo reale
           _scrollToBottom();
         }
       });
@@ -116,7 +122,6 @@ class _ChatScreenState extends State<ChatScreen> {
     if (mounted) {
       setState(() {
         _isAiTyping = false;
-        _streamedResponse = "";
       });
     }
   }
@@ -172,7 +177,12 @@ class _ChatScreenState extends State<ChatScreen> {
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(color: Colors.grey.shade300),
                                 ),
-                                child: MarkdownBody(data: "$_streamedResponse ▋"), // Cursore lampeggiante
+                                child: ValueListenableBuilder<String>(
+                                  valueListenable: _streamedResponseNotifier,
+                                  builder: (context, value, child) {
+                                    return MarkdownBody(data: "$value ▋");
+                                  },
+                                ), // Cursore lampeggiante
                               ),
                             );
                           }
