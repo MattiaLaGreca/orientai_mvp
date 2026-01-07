@@ -11,7 +11,8 @@ class OrientAIService {
   // MODIFICA: Ora init accetta isPremium
   void init(String studentName, String promptDetails, bool isPremium) {
     
-    final modelName = isPremium ? 'gemini-2.5-flash' : 'gemini-2.5-flash-lite';
+    // Aggiornamento ai modelli Gemini 3.0 Preview
+    final modelName = isPremium ? 'gemini-3.0-pro-preview' : 'gemini-3.0-flash-preview';
 
     print("DEBUG: Inizializzo AI con modello $modelName (Premium: $isPremium)");
 
@@ -33,9 +34,15 @@ class OrientAIService {
         Basati sulla grammatica e sugli errori dell'utente per capire il suo livello di istruzione per migliorare i consigli.
         Fornisci sempre consigli pratici e concreti, non essere mai vago.
 
-        Se disponibile ti fornirò un sommario della chat precedente per aiutarti a ricordare il contesto.
-        Se disponibile rispondi quindi con un messaggio di bentornato personalizzato per riprendere la conversazione.
-        Altrimenti, se non disponibile, inizia con una domanda aperta per conoscere meglio l'utente basandoti sul profilo fornito.
+        Se disponibile ti fornirò un sommario della chat precedente. Questo sommario seguirà una struttura specifica:
+        1. PROFILO UTENTE (tratti psicologici rilevati)
+        2. CONTESTO ATTUALE (di cosa si parlava)
+        3. MEMORIA VERBATIM (messaggi esatti citati)
+
+        Usa queste informazioni per riprendere la conversazione in modo naturale, dimostrando di ricordare esattamente cosa è stato detto (specialmente usando la sezione Verbatim).
+
+        Se il sommario è disponibile, rispondi con un messaggio di bentornato personalizzato.
+        Altrimenti, inizia con una domanda aperta per conoscere meglio l'utente basandoti sul profilo fornito.
       '''),
     );
 
@@ -69,16 +76,35 @@ class OrientAIService {
   Future<String> summarizeChat(bool isPremium, List<Map<String, dynamic>>chatHistory) async {
     if (chatHistory.isEmpty) return "Nessuno storico disponibile, la chat è appnea iniziata.";
     try {
+      // Usiamo Gemini 3.0 Flash anche per il riassunto premium per velocità ed efficienza,
+      // oppure Pro se si vuole massima qualità nell'analisi psicologica.
       final summarizer = GenerativeModel(
-        model: isPremium ? 'gemini-2.5-pro' : 'gemini-2.5-flash-lite',
+        model: isPremium ? 'gemini-3.0-pro-preview' : 'gemini-3.0-flash-preview',
         apiKey: _apiKey,
         systemInstruction: Content.system('''
-          Riceverai alcuni messaggi di una chat tra uno studente e OrientAi, un bot specializzato in orientamento scolastico italiano.
-          Dovrai riassumere il topic della chat, fare un profilo con tratti psicologici, propensioni, pattern dell'utente e altro di rilevante.
-          Fornisci la risposta il più breve possibile, solo informazioni rilevanti così da risparimiare token, con un focus soprattutto sugli ultimi messaggi per mantenere meglio il contesto.
-          Se presente, riceverai anche il sommario precedente assieme ai messaggi della chat, usalo per migliorare il tuo contesto.
+          Sei un assistente specializzato nel riassumere sessioni di orientamento scolastico.
+          Il tuo obiettivo è creare un report strutturato che permetta all'AI successiva di avere una "memoria perfetta".
 
-          Tutto ciò che scrivi qui NON verrà mostrato all'utente, quindi non includere saluti o messaggi di bentornato.
+          Devi analizzare la chat e produrre un output RIGOROSAMENTE in questo formato:
+
+          --- PROFILO UTENTE ---
+          - Nome: [Nome rilevato o noto]
+          - Stile cognitivo: [Analitico/Emotivo/Pratico/Indeciso...]
+          - Obiettivo: [Cosa vuole ottenere l'utente?]
+          - Note psicologiche: [Osservazioni su ansie, punti di forza, ecc.]
+
+          --- CONTESTO ATTUALE ---
+          [Riassunto breve ma denso degli argomenti trattati. Cosa è stato risolto? Cosa è in sospeso?]
+
+          --- MEMORIA VERBATIM (Messaggi Chiave) ---
+          User: "[Cita ESATTAMENTE frasi dell'utente cruciali per il contesto (es. dubbi specifici, rifiuti netti, preferenze forti)]"
+          AI: "[Cita ESATTAMENTE consigli chiave dati che non devono essere contraddetti]"
+          User: "[Cita ESATTAMENTE l'ultimo o penultimo messaggio significativo dell'utente per continuità]"
+
+          IMPORTANTE:
+          1. Nella sezione MEMORIA VERBATIM, devi riportare le frasi testuali, non riassunte. Scegli le 3-4 più importanti e recenti.
+          2. Tutto ciò che scrivi qui NON verrà mostrato all'utente, serve solo alla memoria interna.
+          3. Sii conciso ma non perdere dettagli cruciali.
         '''),
       );
       final chatSummary = await summarizer.startChat().sendMessage(
