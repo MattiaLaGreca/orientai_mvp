@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../services/ai_service.dart';
 import '../services/database_service.dart';
 import 'profile_screen.dart';
@@ -34,10 +35,41 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _isInitializing = true;
   String fullResponse = "";
 
+  // Ads
+  BannerAd? _bannerAd;
+  bool _isBannerAdReady = false;
+
   @override
   void initState() {
     super.initState();
     _initChat();
+
+    // Inizializza Ads solo se non è premium
+    if (!widget.isPremium) {
+      _loadBannerAd();
+    }
+  }
+
+  void _loadBannerAd() {
+    _bannerAd = BannerAd(
+      adUnitId: 'ca-app-pub-3940256099942544/6300978111', // Test ID
+      request: const AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _isBannerAdReady = true;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          print('Failed to load a banner ad: ${err.message}');
+          _isBannerAdReady = false;
+          ad.dispose();
+        },
+      ),
+    );
+
+    _bannerAd?.load();
   }
 
   @override
@@ -45,6 +77,7 @@ class _ChatScreenState extends State<ChatScreen> {
     _controller.dispose();
     _scrollController.dispose();
     _streamedResponseNotifier.dispose();
+    _bannerAd?.dispose();
     super.dispose();
   }
 
@@ -251,7 +284,13 @@ class _ChatScreenState extends State<ChatScreen> {
                       )
                     ],
                   ),
-                )
+                ),
+                if (_isBannerAdReady && _bannerAd != null)
+                  SizedBox(
+                    width: _bannerAd!.size.width.toDouble(),
+                    height: _bannerAd!.size.height.toDouble(),
+                    child: AdWidget(ad: _bannerAd!),
+                  ),
               ],
             ),
     );

@@ -11,39 +11,46 @@ class OrientAIService {
   // MODIFICA: Ora init accetta isPremium
   void init(String studentName, String promptDetails, bool isPremium) {
     
-    // Aggiornamento ai modelli Gemini 3.0 Preview
-    final modelName = isPremium ? 'gemini-3.0-pro-preview' : 'gemini-3.0-flash-preview';
+    // Ottimizzazione Costi: Uso Gemini 1.5 Flash (economico) per Free, Pro per Premium.
+    final modelName = isPremium ? 'gemini-1.5-pro' : 'gemini-1.5-flash';
 
     print("DEBUG: Inizializzo AI con modello $modelName (Premium: $isPremium)");
 
+    // Istruzione Base Condivisa (Gestione Sommario)
+    const String summaryInstruction = '''
+Se disponibile ti fornirò un sommario della chat precedente (Profilo, Contesto, Verbatim).
+Usa queste informazioni per riprendere la conversazione in modo naturale, dimostrando di ricordare cosa è stato detto.
+Se il sommario è disponibile, rispondi con un messaggio di bentornato personalizzato.
+Altrimenti, inizia con una domanda aperta.
+''';
+
+    // Istruzione Premium (Ricca e Psicologica)
+    final String premiumInstruction = '''
+Sei OrientAI, un esperto orientatore scolastico italiano.
+Aiuta studenti a scegliere il loro percorso futuro, valutando attitudini teoriche o pratiche.
+Stai parlando con $studentName che ha interessi: $promptDetails.
+
+Analizza la personalità dell'utente e adatta i tuoi consigli.
+Metti in pratica strumenti psicologici per comprendere e guidare meglio l'utente.
+Cambia il tono tra il giocoso e il serio in base a come si comporta l'utente.
+Fornisci sempre consigli pratici e concreti.
+
+$summaryInstruction
+''';
+
+    // Istruzione Free (Concisa ed Economica - Meno Token)
+    final String freeInstruction = '''
+Sei OrientAI, orientatore scolastico. Aiuta studenti a scegliere il percorso futuro.
+Utente: $studentName. Interessi: $promptDetails.
+Sii conciso, veloce e pratico. Usa markdown.
+
+$summaryInstruction
+''';
+
     _model = GenerativeModel(
-      model: modelName, 
+      model: modelName,
       apiKey: _apiKey,
-      systemInstruction: Content.system('''
-        Sei OrientAI, un esperto orientatore scolastico italiano.
-        Non ti occuperai di altro se non di aiutare studenti a scegliere il loro percorso futuro.
-        Considera che lo studente può essere più portato per lo studio o per il lavoro pratico, aiutalo a scoprirlo.
-        Stai parlando con $studentName che ha interessi: $promptDetails.
-        
-        ${isPremium ? "L'utente ha un account premium, non fare risposte troppo prolisse e lente, sii veloce e mettici la cura che ci vuole per un utente pagante" : "L'utente ha un account gratuito, quindi sii conciso e veloce nelle risposte."}
-        Usa anche elenchi puntati e formattazione markdown.
-        
-        Cerca di capire la personalità dell'utente dalle sue risposte e adatta i tuoi consigli.
-        Metti in pratica strumenti psicologici per comprendere e guidare meglio l'utente.
-        Cambia il tono tra il giocoso e il serio in base a come si comporta l'utente. Puoi fare uso di emoji oppure no.
-        Basati sulla grammatica e sugli errori dell'utente per capire il suo livello di istruzione per migliorare i consigli.
-        Fornisci sempre consigli pratici e concreti, non essere mai vago.
-
-        Se disponibile ti fornirò un sommario della chat precedente. Questo sommario seguirà una struttura specifica:
-        1. PROFILO UTENTE (tratti psicologici rilevati)
-        2. CONTESTO ATTUALE (di cosa si parlava)
-        3. MEMORIA VERBATIM (messaggi esatti citati)
-
-        Usa queste informazioni per riprendere la conversazione in modo naturale, dimostrando di ricordare esattamente cosa è stato detto (specialmente usando la sezione Verbatim).
-
-        Se il sommario è disponibile, rispondi con un messaggio di bentornato personalizzato.
-        Altrimenti, inizia con una domanda aperta per conoscere meglio l'utente basandoti sul profilo fornito.
-      '''),
+      systemInstruction: Content.system(isPremium ? premiumInstruction : freeInstruction),
     );
 
     _chat = _model.startChat();
@@ -80,10 +87,9 @@ class OrientAIService {
   Future<String> summarizeChat(bool isPremium, List<Map<String, dynamic>>chatHistory) async {
     if (chatHistory.isEmpty) return "Nessuno storico disponibile, la chat è appnea iniziata.";
     try {
-      // Usiamo Gemini 3.0 Flash anche per il riassunto premium per velocità ed efficienza,
-      // oppure Pro se si vuole massima qualità nell'analisi psicologica.
+      // Usiamo SEMPRE Flash per il riassunto per risparmiare costi (sufficiente per summarization)
       final summarizer = GenerativeModel(
-        model: isPremium ? 'gemini-3.0-pro-preview' : 'gemini-3.0-flash-preview',
+        model: 'gemini-1.5-flash',
         apiKey: _apiKey,
         systemInstruction: Content.system('''
           Sei un assistente specializzato nel riassumere sessioni di orientamento scolastico.
