@@ -11,8 +11,8 @@ L'obiettivo è fornire consigli personalizzati basati sugli interessi, le attitu
 ## 🛠 Stack Tecnologico
 *   **Frontend:** Flutter (Dart).
 *   **Backend:** Firebase (Authentication, Firestore).
-*   **AI:** Google Generative AI (Gemini).
-*   **Monetizzazione:** Google Mobile Ads (Banner, etc - predisposizione).
+*   **AI:** Google Generative AI (Gemini 2.5 Flash Lite / Pro).
+*   **Monetizzazione:** Google Mobile Ads (Banner implementati per utenti Free).
 *   **State Management:** Approccio ibrido con `StreamBuilder` per dati realtime e `StatefulWidget` locali per UI effimera.
 
 ---
@@ -29,21 +29,21 @@ L'obiettivo è fornire consigli personalizzati basati sugli interessi, le attitu
 1.  **`OrientAIService` (`ai_service.dart`)**:
     *   Gestisce l'interazione con l'API di Gemini.
     *   Seleziona il modello in base allo status dell'utente:
-        *   **Premium:** `gemini-2.5-flash` (Più capace/veloce).
-        *   **Free:** `gemini-2.5-flash-lite` (Più economico).
+        *   **Premium:** `gemini-2.5-pro` (Più capace/intelligente).
+        *   **Free:** `gemini-2.5-flash-lite` (Più economico ed efficiente).
     *   **Funzioni Chiave:**
         *   `init`: Imposta il *System Instruction*.
         *   `summarizeChat`: Genera un riassunto delle conversazioni passate per mantenere la memoria a lungo termine.
-        *   `sendMessageWithStreaming`: Gestisce la risposta token-by-token.
+        *   `sendMessageWithStreaming`: Gestisce la risposta token-by-token (Utilizzato per utenti Premium).
 
 2.  **`DatabaseService` (`database_service.dart`)**:
     *   Wrapper per le chiamate a Firestore.
     *   Salva messaggi, profili utente e gestisce i riassunti della chat.
 
 ### Schermate (`lib/screens/`)
-*   **`LoginScreen`**: Gestione Auth (Login/Register).
-*   **`OnboardingScreen`**: Raccolta dati iniziali (Nome, Scuola, Interessi).
-*   **`ChatScreen`**: Il cuore dell'app. Gestisce la UI della chat, lo streaming delle risposte e il rendering Markdown.
+*   **`LoginScreen`**: Gestione Auth (Login/Register). Include validazione email e password (min 6 caratteri).
+*   **`OnboardingScreen`**: Raccolta dati iniziali (Nome, Scuola, Interessi). Include validazione campo nome e capitalizzazione automatica.
+*   **`ChatScreen`**: Il cuore dell'app. Gestisce la UI della chat, lo streaming delle risposte (Premium) e il rendering Markdown. Visualizza Banner Ad per utenti Free.
 
 ---
 

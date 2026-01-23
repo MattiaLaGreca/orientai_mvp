@@ -7,7 +7,7 @@ Questo documento delinea le linee guida strategiche per garantire la sostenibili
 Per mantenere bassi i costi operativi (OpEx) mentre l'app scala, sono necessarie le seguenti azioni immediate:
 
 *   **Intelligenza Artificiale (Il costo maggiore)**:
-    *   **Tier Gratuito**: Utilizzare rigorosamente modelli "Flash" (es. `gemini-1.5-flash`). Hanno un costo per token estremamente basso (o nullo entro certi limiti) pur mantenendo ottime capacità di ragionamento veloce.
+    *   **Tier Gratuito**: Utilizzare rigorosamente modelli "Flash Lite" (es. `gemini-2.5-flash-lite`). Hanno un costo per token estremamente basso pur mantenendo ottime capacità di ragionamento veloce.
     *   **Prompt Engineering**: Ridurre la lunghezza delle "System Instructions" per gli utenti gratuiti. Meno token in ingresso = meno costi per chiamata.
     *   **Summarization**: Utilizzare sempre il modello più economico per riassumere le chat. Non serve un modello "Pro" per sintetizzare del testo.
 
@@ -20,8 +20,8 @@ Per mantenere bassi i costi operativi (OpEx) mentre l'app scala, sono necessarie
 Considerando il target studentesco (bassa disponibilità di spesa), si consiglia un approccio ibrido:
 
 ### A. Modello Freemium (Attuale)
-*   **Utenti Free**: Accesso illimitato ma con modello AI standard (`Flash`) e presenza di banner pubblicitari non invasivi.
-*   **Utenti Premium**: Accesso a modello AI avanzato (`Pro`), nessuna pubblicità, risposte più approfondite/psicologiche.
+*   **Utenti Free**: Accesso illimitato ma con modello AI standard (`2.5 Flash Lite`) e presenza di banner pubblicitari non invasivi.
+*   **Utenti Premium**: Accesso a modello AI avanzato (`2.5 Pro`), nessuna pubblicità, risposte più approfondite/psicologiche, e risposte in streaming.
     *   *Prezzo consigliato*: 2.99€ - 4.99€ / mese (prezzo "caffè").
 
 ### B. Pubblicità (AdMob)
