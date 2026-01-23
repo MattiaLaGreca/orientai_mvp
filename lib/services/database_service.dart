@@ -160,6 +160,9 @@ class DatabaseService {
       query = query.where('createdAt', isGreaterThan: Timestamp.fromDate(since));
     }
 
+    // SICUREZZA COSTI: Limitiamo a 50 messaggi per evitare token explosion in sessioni anomale
+    query = query.limit(50);
+
     final snapshot = await query.get();
     
     await updateSessionStart(); // Aggiorna l'ultima sessione adesso
