@@ -11,8 +11,9 @@ class OrientAIService {
   // MODIFICA: Ora init accetta isPremium
   void init(String studentName, String promptDetails, bool isPremium) {
     
-    // Ottimizzazione Costi: Uso Gemini 1.5 Flash (economico) per Free, Pro per Premium.
-    final modelName = isPremium ? 'gemini-1.5-pro' : 'gemini-1.5-flash';
+    // Update Models: Gemini 2.5 Flash Lite (Free) and 2.5 Pro (Premium)
+    // 2.5 Flash Lite is highly cost-effective ($0.10/1M input).
+    final modelName = isPremium ? 'gemini-2.5-pro' : 'gemini-2.5-flash-lite';
 
     print("DEBUG: Inizializzo AI con modello $modelName (Premium: $isPremium)");
 
@@ -24,8 +25,8 @@ Se il sommario è disponibile, rispondi con un messaggio di bentornato personali
 Altrimenti, inizia con una domanda aperta.
 ''';
 
-    // Istruzione Premium (Ricca e Psicologica)
-    final String premiumInstruction = '''
+    // Istruzione Completa (Ricca e Psicologica) - Usata per TUTTI (Free e Premium)
+    final String fullInstruction = '''
 Sei OrientAI, un esperto orientatore scolastico italiano.
 Aiuta studenti a scegliere il loro percorso futuro, valutando attitudini teoriche o pratiche.
 Stai parlando con $studentName che ha interessi: $promptDetails.
@@ -38,19 +39,10 @@ Fornisci sempre consigli pratici e concreti.
 $summaryInstruction
 ''';
 
-    // Istruzione Free (Concisa ed Economica - Meno Token)
-    final String freeInstruction = '''
-Sei OrientAI, orientatore scolastico. Aiuta studenti a scegliere il percorso futuro.
-Utente: $studentName. Interessi: $promptDetails.
-Sii conciso, veloce e pratico. Usa markdown.
-
-$summaryInstruction
-''';
-
     _model = GenerativeModel(
       model: modelName,
       apiKey: _apiKey,
-      systemInstruction: Content.system(isPremium ? premiumInstruction : freeInstruction),
+      systemInstruction: Content.system(fullInstruction),
     );
 
     _chat = _model.startChat();
@@ -87,9 +79,9 @@ $summaryInstruction
   Future<String> summarizeChat(bool isPremium, List<Map<String, dynamic>>chatHistory) async {
     if (chatHistory.isEmpty) return "Nessuno storico disponibile, la chat è appnea iniziata.";
     try {
-      // Usiamo SEMPRE Flash per il riassunto per risparmiare costi (sufficiente per summarization)
+      // Usiamo SEMPRE Flash Lite per il riassunto per massimo risparmio
       final summarizer = GenerativeModel(
-        model: 'gemini-1.5-flash',
+        model: 'gemini-2.5-flash-lite',
         apiKey: _apiKey,
         systemInstruction: Content.system('''
           Sei un assistente specializzato nel riassumere sessioni di orientamento scolastico.
