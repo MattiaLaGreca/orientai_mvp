@@ -47,7 +47,9 @@ class OrientAIService {
       final response = await _chat.sendMessage(Content.text(message));
       return response.text ?? "Non ho capito, puoi ripetere?";
     } catch (e) {
-      return "Errore AI: $e";
+      // 🔒 Sentinel: Log dell'errore per debug, ma non esporre i dettagli all'utente
+      print("Secure Log - AI sendMessage Error: $e");
+      return "Si è verificato un errore momentaneo. Per favore riprova.";
     }
   }
 
@@ -62,7 +64,9 @@ class OrientAIService {
       }
       return fullResponse;
     } catch (e) {
-      return "Errore AI: $e";
+      // 🔒 Sentinel: Log dell'errore per debug, ma non esporre i dettagli all'utente
+      print("Secure Log - AI sendMessageWithStreaming Error: $e");
+      return "Si è verificato un errore momentaneo durante la generazione della risposta.";
     }
   }
 
@@ -86,7 +90,9 @@ class OrientAIService {
       );
       return chatSummary.text ?? "Nessun sommario disponibile.";
     } catch (e) {
-      return "Errore nel sommario: $e";
+      // 🔒 Sentinel: Log dell'errore per debug, ma non esporre i dettagli
+      print("Secure Log - AI summarizeChat Error: $e");
+      return "Sommario non disponibile al momento.";
     }
   }
 }
