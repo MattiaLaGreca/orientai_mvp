@@ -16,6 +16,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   
   final DatabaseService _dbService = DatabaseService();
   bool _isLoading = false;
+  String? _nameError;
 
   final List<String> _schools = [
     'Liceo Scientifico',
@@ -27,7 +28,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   ];
 
   void _saveAndStart() async {
-    if (_nameController.text.isEmpty) return;
+    final name = _nameController.text.trim();
+    if (name.isEmpty) {
+      setState(() {
+        _nameError = "Inserisci il tuo nome";
+      });
+      return;
+    }
 
     setState(() => _isLoading = true);
 
@@ -98,11 +105,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     
                     TextField(
                       controller: _nameController,
-                      decoration: const InputDecoration(
+                      textCapitalization: TextCapitalization.words,
+                      decoration: InputDecoration(
                         labelText: "Come ti chiami?",
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.person),
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.person),
+                        errorText: _nameError,
                       ),
+                      onChanged: (value) {
+                        if (_nameError != null) {
+                          setState(() {
+                            _nameError = null;
+                          });
+                        }
+                      },
                     ),
                     const SizedBox(height: 16),
 
