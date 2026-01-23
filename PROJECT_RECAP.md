@@ -84,12 +84,16 @@ L'app utilizza un sistema di "Summarization". All'avvio della chat:
 ### Nuove Funzionalità (Medio Termine)
 4.  **Multimodalità (Materiale di Supporto):**
     *   Permettere all'utente di caricare materiale extra (foto, PDF, appunti) non solo per farsi "leggere" il contenuto, ma per fornire all'AI un contesto più ricco su chi è e come lavora, migliorando la qualità del consiglio.
-5.  **Assistente Attivo (Scadenze & Notifiche):**
-    *   Trasformare l'app da passiva ad attiva: l'AI identifica date chiave (TOLC, scadenze immatricolazioni) e aiuta l'utente a ricordarle tramite notifiche o integrazione con il calendario, rendendo l'app "viva" anche fuori dalla chat.
+5.  **Assistente Attivo (Retention & Utility):**
+    *   Trasformare l'app da passiva ad attiva.
+    *   **Scadenze:** L'AI identifica date chiave (TOLC, immatricolazioni) e aiuta l'utente a ricordarle.
+    *   **Smart Notifications:** Implementare notifiche push personalizzate generate dall'AI (es. "Com'è andata la simulazione di test ieri?") per aumentare la retention e far sentire l'utente seguito.
 
 ### Sviluppi Post-Lancio (Lungo Termine)
 *   **Partnership Universitarie & Community:** Creare un ponte diretto con "ambassador" (studenti reali) delle università. Da implementare solo dopo aver consolidato la fiducia e le relazioni istituzionali.
 *   **Modalità Vocale:** Introdurre la voce per rendere l'interazione più umana, fluida e introspettiva.
 
 ### 🎨 Filosofia di Design (Nota Importante)
-*   **Approccio Professionale, non Gamificato:** L'app evita meccaniche di gioco (quiz, livelli) per mantenere la serietà di un vero percorso di orientamento psicologico. L'AI deve comportarsi come un orientatore/psicologo empatico che adatta il tono (serio o leggero) in base all'utente, ma mantenendo sempre professionalità e autorevolezza.
+*   **Approccio Professionale, con Gamification "Tattica":**
+    *   L'app mantiene un'anima seria e professionale, simile a quella di uno psicologo/orientatore.
+    *   La **Gamification** (quiz, minigiochi) non è il fulcro, ma uno strumento adattivo: l'AI deve decidere di usarla solo quando rileva un utente con bassa soglia dell'attenzione, timido o bloccato, per sbloccare la conversazione.
