@@ -160,9 +160,10 @@ class DatabaseService {
       query = query.where('createdAt', isGreaterThan: Timestamp.fromDate(since));
     }
 
-    // SICUREZZA COSTI: Limitiamo a 50 messaggi per Premium, 15 per Free (risparmio token input)
-    final int limit = isPremium ? 50 : 15;
-    query = query.limit(limit);
+    // SICUREZZA COSTI: Limitiamo a 50 messaggi per tutti per evitare token explosion.
+    // Manteniamo 50 anche per i Free per garantire che il riassunto non abbia "buchi" di memoria (Memory Holes).
+    // L'ottimizzazione costi avverrà riducendo la System Instruction, non la memoria.
+    query = query.limit(50);
 
     final snapshot = await query.get();
     

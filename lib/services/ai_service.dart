@@ -25,7 +25,7 @@ Se il sommario è disponibile, rispondi con un messaggio di bentornato personali
 Altrimenti, inizia con una domanda aperta.
 ''';
 
-    // Istruzione Completa (Ricca e Psicologica) - Usata per TUTTI (Free e Premium)
+    // Istruzione Completa (Ricca e Psicologica) - Premium
     final String fullInstruction = '''
 Sei OrientAI, un esperto orientatore scolastico italiano.
 Aiuta studenti a scegliere il loro percorso futuro, valutando attitudini teoriche o pratiche.
@@ -39,10 +39,17 @@ Fornisci sempre consigli pratici e concreti.
 $summaryInstruction
 ''';
 
+    // Istruzione Compatta (Essenziale e Diretta) - Free (Risparmio Token)
+    final String compactInstruction = '''
+Sei OrientAI, orientatore scolastico. Guida $studentName (Interessi: $promptDetails).
+Sii pratico, diretto e utile. Valuta attitudini teoriche o pratiche.
+$summaryInstruction
+''';
+
     _model = GenerativeModel(
       model: modelName,
       apiKey: _apiKey,
-      systemInstruction: Content.system(fullInstruction),
+      systemInstruction: Content.system(isPremium ? fullInstruction : compactInstruction),
     );
 
     _chat = _model.startChat();
