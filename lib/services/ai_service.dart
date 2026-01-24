@@ -54,7 +54,7 @@ $summaryInstruction
       return response.text ?? "Non ho capito, puoi ripetere?";
     } catch (e) {
       // 🔒 Sentinel: Log dell'errore per debug, ma non esporre i dettagli all'utente
-      print("Secure Log - AI sendMessage Error: $e");
+      _logSecurely("AI sendMessage Error", e);
       return "Si è verificato un errore momentaneo. Per favore riprova.";
     }
   }
@@ -71,7 +71,7 @@ $summaryInstruction
       return fullResponse;
     } catch (e) {
       // 🔒 Sentinel: Log dell'errore per debug, ma non esporre i dettagli all'utente
-      print("Secure Log - AI sendMessageWithStreaming Error: $e");
+      _logSecurely("AI sendMessageWithStreaming Error", e);
       return "Si è verificato un errore momentaneo durante la generazione della risposta.";
     }
   }
@@ -115,8 +115,17 @@ $summaryInstruction
       return chatSummary.text ?? "Nessun sommario disponibile.";
     } catch (e) {
       // 🔒 Sentinel: Log dell'errore per debug, ma non esporre i dettagli
-      print("Secure Log - AI summarizeChat Error: $e");
+      _logSecurely("AI summarizeChat Error", e);
       return "Sommario non disponibile al momento.";
     }
+  }
+
+  /// 🔒 Sentinel: Sanitizza i log per evitare di esporre la API Key
+  void _logSecurely(String context, Object error) {
+    String message = error.toString();
+    if (message.contains(_apiKey)) {
+      message = message.replaceAll(_apiKey, '***API_KEY***');
+    }
+    print("Secure Log - $context: $message");
   }
 }
