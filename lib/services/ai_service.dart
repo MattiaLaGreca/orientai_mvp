@@ -1,5 +1,6 @@
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:orientai/secrets.dart';
+import '../utils/secure_logger.dart';
 
 class OrientAIService {
   // ⚠️ IMPORTANTE: Assicurati che qui ci sia la tua API KEY corretta!
@@ -15,7 +16,7 @@ class OrientAIService {
     // 2.5 Flash Lite is highly cost-effective ($0.10/1M input).
     final modelName = isPremium ? 'gemini-2.5-pro' : 'gemini-2.5-flash-lite';
 
-    print("DEBUG: Inizializzo AI con modello $modelName (Premium: $isPremium)");
+    SecureLogger.log("Init", "Inizializzo AI con modello $modelName (Premium: $isPremium)");
 
     // Istruzione Ottimizzata (Sintattica & Psicologica) - UNICA PER TUTTI
     // Condensiamo i concetti per risparmiare token senza perdere qualità (AI-Native density).
@@ -49,8 +50,7 @@ Usa queste informazioni per riprendere la conversazione in modo naturale, dimost
       final response = await _chat.sendMessage(Content.text(message));
       return response.text ?? "Non ho capito, puoi ripetere?";
     } catch (e) {
-      // 🔒 Sentinel: Log dell'errore per debug, ma non esporre i dettagli all'utente
-      _logSecurely("AI sendMessage Error", e);
+      SecureLogger.log("AI sendMessage Error", e);
       return "Si è verificato un errore momentaneo. Per favore riprova.";
     }
   }
@@ -66,8 +66,7 @@ Usa queste informazioni per riprendere la conversazione in modo naturale, dimost
       }
       return buffer.toString();
     } catch (e) {
-      // 🔒 Sentinel: Log dell'errore per debug, ma non esporre i dettagli all'utente
-      _logSecurely("AI sendMessageWithStreaming Error", e);
+      SecureLogger.log("AI sendMessageWithStreaming Error", e);
       return "Si è verificato un errore momentaneo durante la generazione della risposta.";
     }
   }
@@ -110,18 +109,8 @@ Usa queste informazioni per riprendere la conversazione in modo naturale, dimost
       );
       return chatSummary.text ?? "Nessun sommario disponibile.";
     } catch (e) {
-      // 🔒 Sentinel: Log dell'errore per debug, ma non esporre i dettagli
-      _logSecurely("AI summarizeChat Error", e);
+      SecureLogger.log("AI summarizeChat Error", e);
       return "Sommario non disponibile al momento.";
     }
-  }
-
-  /// 🔒 Sentinel: Sanitizza i log per evitare di esporre la API Key
-  void _logSecurely(String context, Object error) {
-    String message = error.toString();
-    if (message.contains(_apiKey)) {
-      message = message.replaceAll(_apiKey, '***API_KEY***');
-    }
-    print("Secure Log - $context: $message");
   }
 }

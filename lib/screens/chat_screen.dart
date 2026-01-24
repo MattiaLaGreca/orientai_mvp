@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../services/ai_service.dart';
 import '../services/database_service.dart';
+import '../utils/secure_logger.dart';
 import 'profile_screen.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -62,7 +63,7 @@ class _ChatScreenState extends State<ChatScreen> {
           });
         },
         onAdFailedToLoad: (ad, err) {
-          print('Failed to load a banner ad: ${err.message}');
+          SecureLogger.log('BannerAd', 'Failed to load: ${err.message}');
           _isBannerAdReady = false;
           ad.dispose();
         },
@@ -82,7 +83,6 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _initChat() async {
-    // Parallelize data fetching
     final results = await Future.wait([
       _dbService.getChatHistoryForAI(widget.isPremium),
       _dbService.getSummary(),
@@ -100,13 +100,11 @@ class _ChatScreenState extends State<ChatScreen> {
 
     String promptDetails = "Interessi: ${widget.interests}; Frequenta: ${widget.schoolType}";
 
-    // Inizializza l'AI con la cronologia reale
     _aiService.init(widget.studentName, promptDetails, widget.isPremium);
     
     String summary = await _aiService.summarizeChat(widget.isPremium, chatHistory);
-    print("DEBUG: Sommario Chat Iniziale:\n$summary");
+    SecureLogger.log("ChatScreen", "Sommario Iniziale: $summary");
 
-    // Parallelize sending message to AI and saving summary
     final aiResults = await Future.wait([
       _aiService.sendMessage(summary),
       _dbService.saveSummary("Sommario Chat:\n$summary"),
@@ -123,11 +121,10 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  // Feature: Scroll automatico all'ultimo messaggio
   void _scrollToBottom() {
     if (_scrollController.hasClients) {
       _scrollController.animateTo(
-        0, // ListView ha reverse: true, quindi 0 è la fine
+        0,
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOut,
       );
@@ -140,7 +137,6 @@ class _ChatScreenState extends State<ChatScreen> {
 
     _controller.clear();
     
-    // Salva messaggio UTENTE
     await _dbService.sendMessage(text, true);
     
     _streamedResponseNotifier.value = "";
@@ -151,7 +147,7 @@ class _ChatScreenState extends State<ChatScreen> {
     if (widget.isPremium) {
       fullResponse = await _aiService.sendMessageWithStreaming(text, (chunk) {
         if (mounted) {
-          _streamedResponseNotifier.value = chunk; // Aggiorna UI in tempo reale
+          _streamedResponseNotifier.value = chunk;
           _scrollToBottom();
         }
       });
@@ -160,7 +156,6 @@ class _ChatScreenState extends State<ChatScreen> {
       fullResponse = await _aiService.sendMessage(text);
     }
 
-    // Salva risposta AI
     await _dbService.sendMessage(fullResponse, false);
     
     if (mounted) {
@@ -170,9 +165,24 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  void _openProfile() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ProfileScreen(
+          userData: {
+            'name': widget.studentName,
+            'interests': widget.interests,
+            'school': widget.schoolType,
+            // 'isPremium': widget.isPremium // ProfileScreen might need this but checking its constructor, it takes a Map
+          },
+        ),
+      ),
+    );
+  }
+
   Future<void> _logout() async {
     await _dbService.signOut();
-    // Il main.dart riporterà l'utente al Login
   }
 
    @override
@@ -185,6 +195,7 @@ class _ChatScreenState extends State<ChatScreen> {
         backgroundColor: themeColor,
         foregroundColor: Colors.white,
         actions: [
+          IconButton(onPressed: _openProfile, icon: const Icon(Icons.person)),
           IconButton(onPressed: _logout, icon: const Icon(Icons.logout))
         ],
       ),
@@ -203,13 +214,11 @@ class _ChatScreenState extends State<ChatScreen> {
                       final docs = snapshot.data!.docs;
 
                       return ListView.builder(
-                        controller: _scrollController, // Colleghiamo il controller
+                        controller: _scrollController,
                         reverse: true,
                         padding: const EdgeInsets.all(16),
-                        // Aggiungiamo +1 al count se l'AI sta scrivendo per mostrare il messaggio "fantasma"
                         itemCount: docs.length + (_isAiTyping ? 1 : 0),
                         itemBuilder: (context, index) {
-                          // Se stiamo scrivendo, il primo elemento (index 0) è lo stream
                           if (_isAiTyping && index == 0) {
                             return Align(
                               alignment: Alignment.centerLeft,
@@ -226,12 +235,11 @@ class _ChatScreenState extends State<ChatScreen> {
                                   builder: (context, value, child) {
                                     return MarkdownBody(data: "$value ▋");
                                   },
-                                ), // Cursore lampeggiante
+                                ),
                               ),
                             );
                           }
 
-                          // Shift dell'indice se c'è lo stream in corso
                           final dbIndex = _isAiTyping ? index - 1 : index;
                           final data = docs[dbIndex].data() as Map<String, dynamic>;
                           final isUser = data['isUser'] ?? false;
@@ -261,7 +269,6 @@ class _ChatScreenState extends State<ChatScreen> {
                     },
                   ),
                 ),
-                // Input Area (rimane simile ma invoca il nuovo _handleSend)
                 Container(
                   padding: const EdgeInsets.all(8),
                   color: Colors.white,

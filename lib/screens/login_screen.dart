@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/database_service.dart';
+import '../utils/custom_exceptions.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -67,14 +68,13 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
       // Se va tutto bene, il main.dart rileverà il cambio di stato e cambierà schermata
+    } on OrientAIAuthException catch (e) {
+      setState(() {
+        _errorMessage = e.message;
+      });
     } catch (e) {
       setState(() {
-        // Messaggio di errore semplificato per l'utente
-        _errorMessage = e.toString().contains('email-already-in-use') 
-            ? "Email già registrata." 
-            : e.toString().contains('wrong-password')
-                ? "Password sbagliata."
-                : "Errore: controlla i dati e riprova.";
+        _errorMessage = "Errore imprevisto. Riprova più tardi.";
       });
     } finally {
       if (mounted) setState(() => _isLoading = false);
