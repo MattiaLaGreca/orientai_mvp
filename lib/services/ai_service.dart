@@ -60,15 +60,15 @@ $summaryInstruction
   }
 
   Future<String> sendMessageWithStreaming(String message, void Function(String) onPartialResponse) async {
-    String fullResponse = '';
+    final buffer = StringBuffer();
     try {
       await for (final chunk in _chat.sendMessageStream(Content.text(message))) {
         if (chunk.text != null) {
-          fullResponse += chunk.text!;
-          onPartialResponse(fullResponse);
+          buffer.write(chunk.text!);
+          onPartialResponse(buffer.toString());
         }
       }
-      return fullResponse;
+      return buffer.toString();
     } catch (e) {
       // 🔒 Sentinel: Log dell'errore per debug, ma non esporre i dettagli all'utente
       print("Secure Log - AI sendMessageWithStreaming Error: $e");
