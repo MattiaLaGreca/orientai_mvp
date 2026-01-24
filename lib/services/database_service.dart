@@ -160,10 +160,10 @@ class DatabaseService {
       query = query.where('createdAt', isGreaterThan: Timestamp.fromDate(since));
     }
 
-    // SICUREZZA COSTI: Limitiamo a 50 messaggi per tutti per evitare token explosion.
-    // Manteniamo 50 anche per i Free per garantire che il riassunto non abbia "buchi" di memoria (Memory Holes).
-    // L'ottimizzazione costi avverrà riducendo la System Instruction, non la memoria.
-    query = query.limit(50);
+    // NOTE: Rimosso il limite hard (e.g. .limit(50)) su richiesta esplicita.
+    // Si recuperano TUTTI i messaggi dall'ultima sessione (identificati da 'since').
+    // Questo garantisce che il summarizer veda tutto il contesto nuovo, ma espone a rischi di costi elevati
+    // se l'utente genera centinaia di messaggi in una sola sessione.
 
     final snapshot = await query.get();
     
