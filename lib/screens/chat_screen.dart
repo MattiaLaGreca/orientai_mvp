@@ -84,7 +84,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _initChat() async {
     // Parallelize data fetching
     final results = await Future.wait([
-      _dbService.getChatHistoryForAI(),
+      _dbService.getChatHistoryForAI(widget.isPremium),
       _dbService.getSummary(),
     ]);
 

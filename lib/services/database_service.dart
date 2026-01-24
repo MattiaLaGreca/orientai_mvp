@@ -143,7 +143,7 @@ class DatabaseService {
     return query.snapshots();
   }
 
-  Future<List<Map<String, dynamic>>> getChatHistoryForAI() async {
+  Future<List<Map<String, dynamic>>> getChatHistoryForAI(bool isPremium) async {
     final user = _auth.currentUser;
     DateTime? since = await getLastSessionStart();
 
@@ -160,8 +160,9 @@ class DatabaseService {
       query = query.where('createdAt', isGreaterThan: Timestamp.fromDate(since));
     }
 
-    // SICUREZZA COSTI: Limitiamo a 50 messaggi per evitare token explosion in sessioni anomale
-    query = query.limit(50);
+    // SICUREZZA COSTI: Limitiamo a 50 messaggi per Premium, 15 per Free (risparmio token input)
+    final int limit = isPremium ? 50 : 15;
+    query = query.limit(limit);
 
     final snapshot = await query.get();
     
