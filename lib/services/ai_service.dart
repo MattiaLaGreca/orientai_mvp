@@ -9,7 +9,7 @@ class OrientAIService {
   late final ChatSession _chat;
 
   // MODIFICA: Ora init accetta isPremium
-  void init(String studentName, String promptDetails, bool isPremium) {
+  void init(String studentName, String promptDetails, bool isPremium, {GenerativeModel? modelOverride, ChatSession? chatOverride}) {
     
     // Update Models: Gemini 2.5 Flash Lite (Free) and 2.5 Pro (Premium)
     // 2.5 Flash Lite is highly cost-effective ($0.10/1M input).
@@ -39,13 +39,13 @@ Fornisci sempre consigli pratici e concreti.
 $summaryInstruction
 ''';
 
-    _model = GenerativeModel(
+    _model = modelOverride ?? GenerativeModel(
       model: modelName,
       apiKey: _apiKey,
       systemInstruction: Content.system(fullInstruction),
     );
 
-    _chat = _model.startChat();
+    _chat = chatOverride ?? _model.startChat();
   }
 
   Future<String> sendMessage(String message) async {
