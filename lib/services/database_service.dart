@@ -2,8 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class DatabaseService {
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _db;
+  final FirebaseAuth _auth;
+
+  DatabaseService({FirebaseFirestore? db, FirebaseAuth? auth})
+      : _db = db ?? FirebaseFirestore.instance,
+        _auth = auth ?? FirebaseAuth.instance;
 
   // Ottieni l'utente corrente
   User? get currentUser => _auth.currentUser;
@@ -203,12 +207,18 @@ class DatabaseService {
     final user = _auth.currentUser;
     if (user == null) return;
     
-    final batch = _db.batch();
-    final snapshots = await _db.collection('users').doc(user.uid).collection('messages').get();
-    
-    for (var doc in snapshots.docs) {
-      batch.delete(doc.reference);
+    final collection = _db.collection('users').doc(user.uid).collection('messages');
+
+    // Elimina a blocchi di 500 per rispettare i limiti di Firestore e ottimizzare la memoria
+    while (true) {
+      final snapshot = await collection.limit(500).get();
+      if (snapshot.docs.isEmpty) break;
+
+      final batch = _db.batch();
+      for (var doc in snapshot.docs) {
+        batch.delete(doc.reference);
+      }
+      await batch.commit();
     }
-    await batch.commit();
   }
 }
