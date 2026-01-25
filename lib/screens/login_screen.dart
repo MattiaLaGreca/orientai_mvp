@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/database_service.dart';
+import '../utils/custom_exceptions.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -67,14 +68,13 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
       // Se va tutto bene, il main.dart rileverà il cambio di stato e cambierà schermata
+    } on OrientAIAuthException catch (e) {
+      setState(() {
+        _errorMessage = e.message;
+      });
     } catch (e) {
       setState(() {
-        // Messaggio di errore semplificato per l'utente
-        _errorMessage = e.toString().contains('email-already-in-use') 
-            ? "Email già registrata." 
-            : e.toString().contains('wrong-password')
-                ? "Password sbagliata."
-                : "Errore: controlla i dati e riprova.";
+        _errorMessage = "Errore imprevisto. Riprova più tardi.";
       });
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -88,11 +88,12 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Icon(Icons.school, size: 80, color: Colors.indigo),
+          child: AutofillGroup(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Icon(Icons.school, size: 80, color: Colors.indigo),
               const SizedBox(height: 16),
               Text(
                 _isLogin ? "Bentornato!" : "Crea Account",
@@ -119,6 +120,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   prefixIcon: Icon(Icons.email),
                 ),
                 keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.next,
+                autofillHints: const [AutofillHints.email],
               ),
               const SizedBox(height: 16),
               TextField(
@@ -142,6 +145,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 obscureText: _obscurePassword,
+                textInputAction: TextInputAction.done,
+                autofillHints: const [AutofillHints.password],
+                onSubmitted: (_) => _submit(),
               ),
               const SizedBox(height: 24),
 
@@ -167,7 +173,8 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ],
           ),
-        ),
+        ), // AutofillGroup
+      ),
       ),
     );
   }

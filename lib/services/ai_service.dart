@@ -1,5 +1,6 @@
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:orientai/secrets.dart';
+import '../utils/secure_logger.dart';
 
 class OrientAIService {
   // ⚠️ IMPORTANTE: Assicurati che qui ci sia la tua API KEY corretta!
@@ -9,43 +10,39 @@ class OrientAIService {
   late final ChatSession _chat;
 
   // MODIFICA: Ora init accetta isPremium
-  void init(String studentName, String promptDetails, bool isPremium) {
+  void init(String studentName, String promptDetails, bool isPremium, {GenerativeModel? modelOverride, ChatSession? chatOverride}) {
     
     // Update Models: Gemini 2.5 Flash Lite (Free) and 2.5 Pro (Premium)
     // 2.5 Flash Lite is highly cost-effective ($0.10/1M input).
     final modelName = isPremium ? 'gemini-2.5-pro' : 'gemini-2.5-flash-lite';
 
-    print("DEBUG: Inizializzo AI con modello $modelName (Premium: $isPremium)");
+    SecureLogger.log("Init", "Inizializzo AI con modello $modelName (Premium: $isPremium)");
 
-    // Istruzione Base Condivisa (Gestione Sommario)
-    const String summaryInstruction = '''
+    // Istruzione Ottimizzata (Sintattica & Psicologica) - UNICA PER TUTTI
+    // Condensiamo i concetti per risparmiare token senza perdere qualità (AI-Native density).
+    final String optimizedInstruction = '''
+RUOLO: OrientAI, orientatore scolastico esperto (IT).
+UTENTE: $studentName. DATA: $promptDetails.
+OBIETTIVO: Guidare scelta percorso (Teorico vs Pratico).
+METODO: Profilazione Psicologica + Consigli Pratici.
+TONO: Adattivo (Serio<->Giocoso). Empatico ma concreto.
+
+ISTRUZIONI OPERATIVE:
+1. Analizza personalità/ansie nascoste.
+2. Usa info da Sommario (se presente) per continuità totale.
+3. Se Sommario presente: Bentornato personalizzato. Altrimenti: Domanda aperta.
+
 Se disponibile ti fornirò un sommario della chat precedente (Profilo, Contesto, Verbatim).
 Usa queste informazioni per riprendere la conversazione in modo naturale, dimostrando di ricordare cosa è stato detto.
-Se il sommario è disponibile, rispondi con un messaggio di bentornato personalizzato.
-Altrimenti, inizia con una domanda aperta.
 ''';
 
-    // Istruzione Completa (Ricca e Psicologica) - Usata per TUTTI (Free e Premium)
-    final String fullInstruction = '''
-Sei OrientAI, un esperto orientatore scolastico italiano.
-Aiuta studenti a scegliere il loro percorso futuro, valutando attitudini teoriche o pratiche.
-Stai parlando con $studentName che ha interessi: $promptDetails.
-
-Analizza la personalità dell'utente e adatta i tuoi consigli.
-Metti in pratica strumenti psicologici per comprendere e guidare meglio l'utente.
-Cambia il tono tra il giocoso e il serio in base a come si comporta l'utente.
-Fornisci sempre consigli pratici e concreti.
-
-$summaryInstruction
-''';
-
-    _model = GenerativeModel(
+    _model = modelOverride ?? GenerativeModel(
       model: modelName,
       apiKey: _apiKey,
-      systemInstruction: Content.system(fullInstruction),
+      systemInstruction: Content.system(optimizedInstruction),
     );
 
-    _chat = _model.startChat();
+    _chat = chatOverride ?? _model.startChat();
   }
 
   Future<String> sendMessage(String message) async {
@@ -53,25 +50,23 @@ $summaryInstruction
       final response = await _chat.sendMessage(Content.text(message));
       return response.text ?? "Non ho capito, puoi ripetere?";
     } catch (e) {
-      // 🔒 Sentinel: Log dell'errore per debug, ma non esporre i dettagli all'utente
-      print("Secure Log - AI sendMessage Error: $e");
+      SecureLogger.log("AI sendMessage Error", e);
       return "Si è verificato un errore momentaneo. Per favore riprova.";
     }
   }
 
   Future<String> sendMessageWithStreaming(String message, void Function(String) onPartialResponse) async {
-    String fullResponse = '';
+    final buffer = StringBuffer();
     try {
       await for (final chunk in _chat.sendMessageStream(Content.text(message))) {
         if (chunk.text != null) {
-          fullResponse += chunk.text!;
-          onPartialResponse(fullResponse);
+          buffer.write(chunk.text!);
+          onPartialResponse(buffer.toString());
         }
       }
-      return fullResponse;
+      return buffer.toString();
     } catch (e) {
-      // 🔒 Sentinel: Log dell'errore per debug, ma non esporre i dettagli all'utente
-      print("Secure Log - AI sendMessageWithStreaming Error: $e");
+      SecureLogger.log("AI sendMessageWithStreaming Error", e);
       return "Si è verificato un errore momentaneo durante la generazione della risposta.";
     }
   }
@@ -114,8 +109,7 @@ $summaryInstruction
       );
       return chatSummary.text ?? "Nessun sommario disponibile.";
     } catch (e) {
-      // 🔒 Sentinel: Log dell'errore per debug, ma non esporre i dettagli
-      print("Secure Log - AI summarizeChat Error: $e");
+      SecureLogger.log("AI summarizeChat Error", e);
       return "Sommario non disponibile al momento.";
     }
   }

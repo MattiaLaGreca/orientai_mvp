@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../utils/custom_exceptions.dart';
+import '../utils/secure_logger.dart';
 
 class DatabaseService {
   final FirebaseFirestore _db;
@@ -28,9 +30,16 @@ class DatabaseService {
         await _initUserData(credential.user!.uid);
       }
       return credential.user;
+    } on FirebaseAuthException catch (e) {
+      SecureLogger.log("SignUp Firebase Error", e);
+      String msg = "Impossibile completare la registrazione.";
+      if (e.code == 'email-already-in-use') msg = "Questa email è già registrata.";
+      else if (e.code == 'weak-password') msg = "La password è troppo debole.";
+      else if (e.code == 'invalid-email') msg = "L'email non è valida.";
+      throw OrientAIAuthException(msg, code: e.code);
     } catch (e) {
-      print("Errore Registrazione: $e");
-      rethrow;
+      SecureLogger.log("SignUp Generic Error", e);
+      throw OrientAIAuthException("Si è verificato un errore durante la registrazione. Riprova più tardi.");
     }
   }
 
@@ -41,24 +50,43 @@ class DatabaseService {
         password: password,
       );
       return credential.user;
+    } on FirebaseAuthException catch (e) {
+      SecureLogger.log("SignIn Firebase Error", e);
+      String msg = "Impossibile accedere.";
+      if (e.code == 'user-not-found' || e.code == 'wrong-password' || e.code == 'invalid-credential') {
+        msg = "Email o password non corretti.";
+      } else if (e.code == 'user-disabled') {
+        msg = "L'account è stato disabilitato.";
+      }
+      throw OrientAIAuthException(msg, code: e.code);
     } catch (e) {
-      print("Errore Login: $e");
-      rethrow;
+      SecureLogger.log("SignIn Generic Error", e);
+      throw OrientAIAuthException("Si è verificato un errore di accesso. Riprova più tardi.");
     }
   }
 
   Future<void> signOut() async {
-    await _auth.signOut();
+    try {
+      await _auth.signOut();
+    } catch (e) {
+      SecureLogger.log("SignOut Error", e);
+      // Non lanciamo eccezione qui, l'utente vuole solo uscire
+    }
   }
 
   // --- 2. GESTIONE PROFILO E PREMIUM ---
 
   // Inizializza i dati base per un nuovo utente
   Future<void> _initUserData(String uid) async {
-    await _db.collection('users').doc(uid).set({
-      'isPremium': false, // Di default è Free
-      'createdAt': FieldValue.serverTimestamp(),
-    }, SetOptions(merge: true));
+    try {
+      await _db.collection('users').doc(uid).set({
+        'isPremium': false, // Di default è Free
+        'createdAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    } catch (e) {
+      SecureLogger.log("InitUserData Error", e);
+      throw OrientAIDataException("Errore nella creazione del profilo utente.");
+    }
   }
 
   // Salva o Aggiorna il Profilo Studente
@@ -66,12 +94,17 @@ class DatabaseService {
     final user = _auth.currentUser;
     if (user == null) return;
 
-    await _db.collection('users').doc(user.uid).set({
-      'name': name,
-      'school': school,
-      'interests': interests,
-      'updatedAt': FieldValue.serverTimestamp(),
-    }, SetOptions(merge: true)); // Usa merge per non sovrascrivere isPremium
+    try {
+      await _db.collection('users').doc(user.uid).set({
+        'name': name,
+        'school': school,
+        'interests': interests,
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    } catch (e) {
+      SecureLogger.log("SaveUserProfile Error", e);
+      throw OrientAIDataException("Impossibile salvare il profilo.");
+    }
   }
 
   // Recupera il Profilo completo (incluso isPremium)
@@ -79,8 +112,13 @@ class DatabaseService {
     final user = _auth.currentUser;
     if (user == null) return null;
 
-    final doc = await _db.collection('users').doc(user.uid).get();
-    return doc.data();
+    try {
+      final doc = await _db.collection('users').doc(user.uid).get();
+      return doc.data();
+    } catch (e) {
+      SecureLogger.log("GetUserProfile Error", e);
+      throw OrientAIDataException("Errore nel recupero del profilo.");
+    }
   }
 
   // Metodo per fare l'upgrade a Premium (da chiamare dopo il pagamento riuscito)
@@ -88,9 +126,14 @@ class DatabaseService {
     final user = _auth.currentUser;
     if (user == null) return;
 
-    await _db.collection('users').doc(user.uid).update({
-      'isPremium': isPremium,
-    });
+    try {
+      await _db.collection('users').doc(user.uid).update({
+        'isPremium': isPremium,
+      });
+    } catch (e) {
+      SecureLogger.log("SetPremiumStatus Error", e);
+      throw OrientAIDataException("Errore nell'aggiornamento dello status Premium.");
+    }
   }
 
   // --- 3. GESTIONE CHAT ---
@@ -99,97 +142,115 @@ class DatabaseService {
   Future<DateTime?> getLastSessionStart() async {
     final user = _auth.currentUser;
     if (user == null) return null;
-    final doc = await _db.collection('users').doc(user.uid).get();
-    final ts = doc.data()?['lastSessionStart'] as Timestamp?;
-    return ts?.toDate();
+    try {
+      final doc = await _db.collection('users').doc(user.uid).get();
+      final ts = doc.data()?['lastSessionStart'] as Timestamp?;
+      return ts?.toDate();
+    } catch (e) {
+      SecureLogger.log("GetLastSessionStart Error", e);
+      return null;
+    }
   }
 
   // Aggiorna il timestamp dell'ultima sessione ad ADESSO
   Future<void> updateSessionStart() async {
     final user = _auth.currentUser;
     if (user == null) return;
-    await _db.collection('users').doc(user.uid).set({
-      'lastSessionStart': FieldValue.serverTimestamp(),
-    }, SetOptions(merge: true));
+    try {
+      await _db.collection('users').doc(user.uid).set({
+        'lastSessionStart': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    } catch (e) {
+      SecureLogger.log("UpdateSessionStart Error", e);
+      // Non bloccante
+    }
   }
 
   Future<void> sendMessage(String text, bool isUser) async {
     final user = _auth.currentUser;
     if (user == null) return;
-    // if (freeCounter == freeLimit) {
-    //  throw Exception("Limite di messaggi gratuiti raggiunto.");
-    // }
-    // freeCounter++;
-    await _db
-        .collection('users')
-        .doc(user.uid)
-        .collection('messages')
-        .add({
-      'text': text,
-      'isUser': isUser,
-      'createdAt': FieldValue.serverTimestamp(),
-    });
+
+    try {
+      await _db
+          .collection('users')
+          .doc(user.uid)
+          .collection('messages')
+          .add({
+        'text': text,
+        'isUser': isUser,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      SecureLogger.log("SendMessage Error", e);
+      throw OrientAIDataException("Impossibile inviare il messaggio.");
+    }
   }
 
   Stream<QuerySnapshot> getMessagesStream(bool isPremium) {
     final user = _auth.currentUser;
     if (user == null) return const Stream.empty();
 
-    Query query = _db
-        .collection('users')
-        .doc(user.uid)
-        .collection('messages')
-        .orderBy('createdAt', descending: true);
+    try {
+      Query query = _db
+          .collection('users')
+          .doc(user.uid)
+          .collection('messages')
+          .orderBy('createdAt', descending: true);
 
-    if (!isPremium) {
-      query.limit(10);
+      if (!isPremium) {
+        query.limit(10);
+      }
+      return query.snapshots();
+    } catch (e) {
+      SecureLogger.log("GetMessagesStream Error", e);
+      return const Stream.empty();
     }
-    return query.snapshots();
   }
 
-  Future<List<Map<String, dynamic>>> getChatHistoryForAI() async {
+  Future<List<Map<String, dynamic>>> getChatHistoryForAI(bool isPremium) async {
     final user = _auth.currentUser;
-    DateTime? since = await getLastSessionStart();
-
     if (user == null) return [];
 
-    Query query = _db
-        .collection('users')
-        .doc(user.uid)
-        .collection('messages')
-        .orderBy('createdAt', descending: true); // Dal più recente
+    try {
+      DateTime? since = await getLastSessionStart();
 
-    if (since != null) {
-      // Logica "Delta": Prendi tutto ciò che è stato scritto dopo l'ultima apertura
-      query = query.where('createdAt', isGreaterThan: Timestamp.fromDate(since));
+      Query query = _db
+          .collection('users')
+          .doc(user.uid)
+          .collection('messages')
+          .orderBy('createdAt', descending: true);
+
+      if (since != null) {
+        query = query.where('createdAt', isGreaterThan: Timestamp.fromDate(since));
+      }
+
+      final snapshot = await query.get();
+
+      await updateSessionStart();
+
+      return snapshot.docs.reversed.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return {
+          'role': (data['isUser'] ?? false) ? 'user' : 'ai',
+          'content': data['text'] ?? '',
+        };
+      }).toList();
+    } catch (e) {
+      SecureLogger.log("GetChatHistoryForAI Error", e);
+      // Invece di crashare, restituiamo una lista vuota così l'AI parte senza contesto ma funziona
+      return [];
     }
-
-    // SICUREZZA COSTI: Limitiamo a 50 messaggi per evitare token explosion in sessioni anomale
-    query = query.limit(50);
-
-    final snapshot = await query.get();
-    
-    await updateSessionStart(); // Aggiorna l'ultima sessione adesso
-    
-    // Li invertiamo per averli cronologici (Vecchio -> Nuovo) per l'AI
-    return snapshot.docs.reversed.map((doc) {
-      final data = doc.data() as Map<String, dynamic>;
-      return {
-        'role': (data['isUser'] ?? false) ? 'user' : 'ai',
-        'content': data['text'] ?? '',
-      };
-    }).toList();
   }
   
   Future<String> getSummary() async {
     final user = _auth.currentUser;
-    if (user == null) throw Exception("Utente non autenticato");
+    if (user == null) throw OrientAIAuthException("Utente non autenticato");
 
     try {
       final doc = await _db.collection('users').doc(user.uid).get();
-      return doc.data()?['chatSummary'] as String;
+      return (doc.data()?['chatSummary'] as String?) ?? "";
     } catch (e) {
-      print("Errore nel recupero del sommario");
+      SecureLogger.log("GetSummary Error", e);
       return "";
     }
   }
@@ -198,9 +259,14 @@ class DatabaseService {
     final user = _auth.currentUser;
     if (user == null) return;
 
-    await _db.collection('users').doc(user.uid).set({
-      'chatSummary': summary,
-    }, SetOptions(merge: true));
+    try {
+      await _db.collection('users').doc(user.uid).set({
+        'chatSummary': summary,
+      }, SetOptions(merge: true));
+    } catch (e) {
+      SecureLogger.log("SaveSummary Error", e);
+      // Non bloccante
+    }
   }
 
   Future<void> clearChat() async {

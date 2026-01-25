@@ -1,82 +1,49 @@
-# OrientAI - Recap del Progetto
+# OrientAI - Masterplan di Progetto
 
-Questo documento serve come "memoria locale" per il progetto OrientAI. Descrive la missione, l'architettura tecnica, le logiche chiave e la visione futura dell'applicazione.
+Questo documento serve come punto di ingresso per la documentazione di OrientAI. Definisce la missione, l'architettura tecnica e rimanda ai documenti operativi specifici.
 
-## 🎯 Missione
-**OrientAI** è un assistente virtuale dedicato all'orientamento scolastico e universitario per studenti italiani.
-L'obiettivo è fornire consigli personalizzati basati sugli interessi, le attitudini e il percorso scolastico attuale dell'utente, aiutandolo a navigare le complessità della scelta universitaria o lavorativa.
+## 🎯 Missione: Active Assistant
+**OrientAI** non è solo una chat, ma un **Assistente Attivo** per l'orientamento scolastico e universitario.
+L'obiettivo è fornire consigli personalizzati e proattivi ("Smart Retention"), aiutando gli studenti italiani a navigare le complessità della scelta universitaria con un tono professionale ma accessibile (e tatticamente "gamificato" dove serve).
+
+---
+
+## 📚 Documentazione Operativa
+*   **[ROADMAP TECNICA](docs/ROADMAP_TECNICA.md)**: Il piano di sviluppo dettagliato (Test, Multimodalità, RAG).
+*   **[CHECKLIST DI RILASCIO](docs/CHECKLIST_RILASCIO.md)**: I passi necessari per pubblicare sullo store (Legale, Asset, Build).
+*   **[STRATEGIA FINANZIARIA](STRATEGIA_FINANZIARIA.md)**: Analisi costi/ricavi e monetizzazione.
 
 ---
 
 ## 🛠 Stack Tecnologico
 *   **Frontend:** Flutter (Dart).
-*   **Backend:** Firebase (Authentication, Firestore).
+*   **Backend:** Firebase (Authentication, Firestore, Storage).
 *   **AI:** Google Generative AI (Gemini 2.5 Flash Lite / Pro).
-*   **Monetizzazione:** Google Mobile Ads (Banner implementati per utenti Free).
-*   **State Management:** Approccio ibrido con `StreamBuilder` per dati realtime e `StatefulWidget` locali per UI effimera.
+*   **Monetizzazione:** Google Mobile Ads (Banner).
 
 ---
 
-## 📂 Struttura del Codice
+## 📂 Struttura del Codice Principale
 
-### Entry Point & Navigazione (`lib/main.dart`)
-*   **`AuthWrapper`**: Gestisce il routing principale.
-    *   Se l'utente non è loggato -> `LoginScreen`.
-    *   Se l'utente è loggato ma non ha un profilo (nome mancante) -> `OnboardingScreen`.
-    *   Se l'utente è loggato e ha un profilo completo -> `ChatScreen`.
+### Entry Point (`lib/main.dart`)
+*   **`AuthWrapper`**: Routing dinamico (Login -> Onboarding -> Chat).
 
 ### Servizi (`lib/services/`)
-1.  **`OrientAIService` (`ai_service.dart`)**:
-    *   Gestisce l'interazione con l'API di Gemini.
-    *   Seleziona il modello in base allo status dell'utente:
-        *   **Premium:** `gemini-2.5-pro` (Più capace/intelligente).
-        *   **Free:** `gemini-2.5-flash-lite` (Più economico ed efficiente).
-    *   **Funzioni Chiave:**
-        *   `init`: Imposta il *System Instruction*.
-        *   `summarizeChat`: Genera un riassunto delle conversazioni passate per mantenere la memoria a lungo termine.
-        *   `sendMessageWithStreaming`: Gestisce la risposta token-by-token (Utilizzato per utenti Premium).
-
-2.  **`DatabaseService` (`database_service.dart`)**:
-    *   Wrapper per le chiamate a Firestore.
-    *   Salva messaggi, profili utente e gestisce i riassunti della chat.
+1.  **`OrientAIService`**: Gestione AI (Flash Lite per Free, Pro per Premium). Gestisce context window e summarization.
+2.  **`DatabaseService`**: Wrapper Firestore per messaggi e profili.
 
 ### Schermate (`lib/screens/`)
-*   **`LoginScreen`**: Gestione Auth (Login/Register). Include validazione email e password (min 6 caratteri).
-*   **`OnboardingScreen`**: Raccolta dati iniziali (Nome, Scuola, Interessi). Include validazione campo nome e capitalizzazione automatica.
-*   **`ChatScreen`**: Il cuore dell'app. Gestisce la UI della chat, lo streaming delle risposte (Premium) e il rendering Markdown. Visualizza Banner Ad per utenti Free.
+*   **`ChatScreen`**: UI principale con supporto streaming e Markdown.
+*   **`OnboardingScreen`**: Profilazione iniziale (interessi, scuola).
+*   **`LoginScreen`**: Autenticazione ibrida (Login/Register).
 
 ---
 
-## 🧠 Logica AI & Prompting
-Il comportamento dell'AI è definito in `OrientAIService`.
+## 🧠 Logica Chiave
 
-**System Instruction (Sintesi):**
-> "Sei OrientAI, un esperto orientatore scolastico italiano... Considera che lo studente può essere più portato per lo studio o per il lavoro pratico... Cerca di capire la personalità dell'utente... Basati sulla grammatica per capire il livello di istruzione."
+### Summarization & Memoria
+Per ottimizzare i token, l'app riassume periodicamente la chat.
+*   *Vedi codice in:* `OrientAIService.summarizeChat`.
 
-**Adattabilità:**
-*   **Utente Premium:** "non fare risposte troppo prolisse... sii veloce e mettici la cura che ci vuole per un utente pagante".
-*   **Utente Free:** "sii conciso e veloce".
-
-**Memoria (Context Window):**
-L'app utilizza un sistema di "Summarization". All'avvio della chat:
-1.  Carica lo storico recente.
-2.  Carica l'ultimo sommario disponibile.
-3.  L'AI genera un nuovo sommario basato sugli ultimi scambi.
-4.  Questo sommario viene iniettato come contesto (`system message`) all'avvio della sessione successiva, permettendo all'AI di "ricordare" chi è l'utente senza dover rileggere l'intera cronologia (risparmio token).
-
----
-
-## 🚀 Finestra sul Futuro (Roadmap)
-
-### Sfide Attuali
-*   **Dati non aggiornati (Allucinazioni):** L'AI, essendo un modello pre-addestrato, può avere informazioni obsolete o errate su specifici corsi universitari.
-    *   *Esempio Reale:* Difficoltà nel reperire informazioni corrette sul corso di "Biologia Molecolare triennale a Padova" (l'AI potrebbe negarne l'esistenza o fornire dettagli vecchi).
-
-### Obiettivi Tecnici
-1.  **RAG (Retrieval-Augmented Generation):**
-    *   Implementare un sistema per "iniettare" conoscenze aggiornate nel prompt.
-    *   Collegare l'AI a database ufficiali (es. Universitaly, siti atenei) o permettere la ricerca web in tempo reale per verificare l'esistenza e i programmi dei corsi.
-2.  **Tool Use (Function Calling):**
-    *   Dotare l'AI della capacità di chiamare funzioni specifiche, es: `cercaCorso(universita, nomeCorso)` per ottenere dati strutturati e reali prima di rispondere.
-3.  **Miglioramento Profilazione:**
-    *   Rendere il profilo utente dinamico: l'AI dovrebbe poter aggiornare gli "interessi" nel database man mano che li scopre chattando.
+### Profilazione Dinamica
+L'app distingue tra utenti Free e Premium non solo per il modello AI usato, ma per la "profondità" della risposta e la presenza di pubblicità.
