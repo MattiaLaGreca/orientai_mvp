@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/database_service.dart';
 
@@ -18,6 +19,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late String _selectedSchool;
   final DatabaseService _dbService = DatabaseService();
   bool _isLoading = false;
+  String _appVersion = '';
 
   final List<String> _schools = [
     'Liceo Scientifico',
@@ -31,6 +33,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
+    _loadVersion();
     // Inizializza i controller con i dati esistenti
     _nameController = TextEditingController(text: widget.userData['name'] ?? '');
     _interestsController = TextEditingController(text: widget.userData['interests'] ?? '');
@@ -117,6 +120,60 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Impossibile aprire il link.')),
         );
+      }
+    }
+  }
+
+  Future<void> _loadVersion() async {
+    final info = await PackageInfo.fromPlatform();
+    if (mounted) setState(() => _appVersion = info.version);
+  }
+
+  Future<void> _launchPrivacy() async {
+    final Uri url = Uri.parse('https://orientai.app/privacy');
+    try {
+      if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+        throw 'Could not launch $url';
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Impossibile aprire il link.')),
+        );
+      }
+    }
+  }
+
+  Future<void> _deleteAccount() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Eliminare l'account?"),
+        content: const Text("Questa azione è irreversibile. Perderai tutti i dati e la cronologia chat."),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text("Annulla")),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text("ELIMINA", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold))
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      setState(() => _isLoading = true);
+      try {
+        await _dbService.deleteAccount();
+        if (mounted) {
+           Navigator.of(context).popUntil((route) => route.isFirst);
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+          );
+          setState(() => _isLoading = false);
+        }
       }
     }
   }
@@ -227,6 +284,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(height: 16),
 
+                  // Tasto Privacy
+                  TextButton.icon(
+                    onPressed: _launchPrivacy,
+                    icon: const Icon(Icons.privacy_tip_outlined),
+                    label: const Text("Privacy Policy"),
+                    style: TextButton.styleFrom(foregroundColor: Colors.indigo),
+                  ),
+
                   // Tasto Cancella Chat
                   OutlinedButton.icon(
                     onPressed: _clearChatHistory,
@@ -246,6 +311,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     icon: const Icon(Icons.logout),
                     label: const Text("Esci dall'account"),
                     style: TextButton.styleFrom(foregroundColor: Colors.grey[700]),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                   // Tasto Elimina Account
+                  TextButton.icon(
+                    onPressed: _deleteAccount,
+                    icon: const Icon(Icons.warning_amber_rounded, color: Colors.red),
+                    label: const Text("Elimina Account", style: TextStyle(color: Colors.red)),
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  Center(
+                    child: Text(
+                      "Versione $_appVersion",
+                      style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                    ),
                   ),
                 ],
               ),
