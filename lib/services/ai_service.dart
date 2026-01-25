@@ -85,29 +85,24 @@ Usa queste informazioni per riprendere la conversazione in modo naturale, dimost
         model: 'gemini-2.5-flash-lite',
         apiKey: _apiKey,
         systemInstruction: Content.system('''
-          Sei un assistente specializzato nel riassumere sessioni di orientamento scolastico.
-          Il tuo obiettivo è creare un report strutturato che permetta all'AI successiva di avere una "memoria perfetta".
-
-          Devi analizzare la chat e produrre un output RIGOROSAMENTE in questo formato:
+          RUOLO: Summarizer OrientAI. OBIETTIVO: Comprimere contesto per memoria futura.
+          OUTPUT RICHIESTO:
 
           --- PROFILO UTENTE ---
-          - Nome: [Nome rilevato o noto]
-          - Stile cognitivo: [Analitico/Emotivo/Pratico/Indeciso...]
-          - Obiettivo: [Cosa vuole ottenere l'utente?]
-          - Note psicologiche: [Osservazioni su ansie, punti di forza, ecc.]
+          Nome: [Valore]
+          Cognitivo: [Analitico/Emotivo/Pratico...]
+          Obiettivo: [Valore]
+          Psico: [Ansie/Punti Forza]
 
-          --- CONTESTO ATTUALE ---
-          [Riassunto breve ma denso degli argomenti trattati. Cosa è stato risolto? Cosa è in sospeso?]
+          --- CONTESTO ---
+          [Riassunto denso stato attuale e temi trattati]
 
-          --- MEMORIA VERBATIM (Messaggi Chiave) ---
-          User: "[Cita ESATTAMENTE frasi dell'utente cruciali per il contesto (es. dubbi specifici, rifiuti netti, preferenze forti)]"
-          AI: "[Cita ESATTAMENTE consigli chiave dati che non devono essere contraddetti]"
-          User: "[Cita ESATTAMENTE l'ultimo o penultimo messaggio significativo dell'utente per continuità]"
+          --- MEMORIA VERBATIM ---
+          User: "[Frase cruciale testuale]"
+          AI: "[Consiglio chiave dato]"
+          User: "[Ultimo messaggio significativo]"
 
-          IMPORTANTE:
-          1. Nella sezione MEMORIA VERBATIM, devi riportare le frasi testuali, non riassunte. Scegli le 3-4 più importanti e recenti.
-          2. Tutto ciò che scrivi qui NON verrà mostrato all'utente, serve solo alla memoria interna.
-          3. Sii conciso ma non perdere dettagli cruciali.
+          VINCOLI: Massima densità informativa. VERBATIM deve citare testualmente 3-4 scambi chiave.
         '''),
       );
       final chatSummary = await summarizer.startChat().sendMessage(

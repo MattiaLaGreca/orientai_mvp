@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../services/database_service.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -105,6 +106,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  Future<void> _launchSupport() async {
+    final Uri url = Uri.parse('https://ko-fi.com'); // Placeholder URL
+    try {
+      if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+        throw 'Could not launch $url';
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Impossibile aprire il link.')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -178,6 +194,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                     child: const Text("Salva Modifiche"),
+                  ),
+
+                  const Divider(height: 40, thickness: 1),
+
+                  const Text(
+                    "Sostieni il Progetto",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.indigo),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    "OrientAI è un progetto indipendente. Se ti è stato utile, considera una piccola donazione per coprire i costi dei server.",
+                    style: TextStyle(fontSize: 14, color: Colors.black54),
+                  ),
+                  const SizedBox(height: 12),
+                  ElevatedButton.icon(
+                    onPressed: _launchSupport,
+                    icon: const Icon(Icons.coffee),
+                    label: const Text("Offrici un Caffè"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.amber[800],
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
                   ),
 
                   const Divider(height: 40, thickness: 1),
