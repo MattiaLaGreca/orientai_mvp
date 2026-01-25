@@ -92,77 +92,83 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             child: Padding(
               padding: const EdgeInsets.all(24),
               child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const Text(
-                      "Raccontaci di te 🚀",
-                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 20),
-                    
-                    TextField(
-                      controller: _nameController,
-                      textCapitalization: TextCapitalization.words,
-                      decoration: InputDecoration(
-                        labelText: "Come ti chiami?",
-                        border: const OutlineInputBorder(),
-                        prefixIcon: const Icon(Icons.person),
-                        errorText: _nameError,
+                child: AutofillGroup(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Text(
+                        "Raccontaci di te 🚀",
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
                       ),
-                      onChanged: (value) {
-                        if (_nameError != null) {
-                          setState(() {
-                            _nameError = null;
-                          });
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 16),
+                      const SizedBox(height: 20),
 
-                    DropdownButtonFormField<String>(
-                      initialValue: _selectedSchool,
-                      decoration: const InputDecoration(
-                        labelText: "Che scuola fai?",
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.school),
+                      TextField(
+                        controller: _nameController,
+                        textCapitalization: TextCapitalization.words,
+                        textInputAction: TextInputAction.next,
+                        autofillHints: const [AutofillHints.name],
+                        decoration: InputDecoration(
+                          labelText: "Come ti chiami?",
+                          border: const OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.person),
+                          errorText: _nameError,
+                        ),
+                        onChanged: (value) {
+                          if (_nameError != null) {
+                            setState(() {
+                              _nameError = null;
+                            });
+                          }
+                        },
                       ),
-                      items: _schools.map((String school) {
-                        return DropdownMenuItem(value: school, child: Text(school));
-                      }).toList(),
-                      onChanged: (val) => setState(() => _selectedSchool = val!),
-                    ),
-                    const SizedBox(height: 16),
+                      const SizedBox(height: 16),
 
-                    TextField(
-                      controller: _interestsController,
-                      decoration: const InputDecoration(
-                        labelText: "Interessi? (Es. Videogiochi, Arte)",
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.favorite),
+                      DropdownButtonFormField<String>(
+                        initialValue: _selectedSchool,
+                        decoration: const InputDecoration(
+                          labelText: "Che scuola fai?",
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.school),
+                        ),
+                        items: _schools.map((String school) {
+                          return DropdownMenuItem(value: school, child: Text(school));
+                        }).toList(),
+                        onChanged: (val) => setState(() => _selectedSchool = val!),
                       ),
-                    ),
-                    const SizedBox(height: 24),
+                      const SizedBox(height: 16),
 
-                    ElevatedButton(
-                      onPressed: _isLoading ? null : _saveAndStart,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.indigo,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      TextField(
+                        controller: _interestsController,
+                        textInputAction: TextInputAction.done,
+                        onSubmitted: (_) => _saveAndStart(),
+                        decoration: const InputDecoration(
+                          labelText: "Interessi? (Es. Videogiochi, Arte)",
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.favorite),
+                        ),
                       ),
-                      child: _isLoading 
-                        ? const CircularProgressIndicator(color: Colors.white) 
-                        : const Text("Salva Profilo"),
-                    ),
-                    const SizedBox(height: 8),
-                    TextButton(
-                      onPressed: _logout,
-                      child: const Text("Non sei tu? Esci", style: TextStyle(color: Colors.grey)),
-                    ),
-                  ],
+                      const SizedBox(height: 24),
+
+                      ElevatedButton(
+                        onPressed: _isLoading ? null : _saveAndStart,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.indigo,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        child: _isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text("Salva Profilo"),
+                      ),
+                      const SizedBox(height: 8),
+                      TextButton(
+                        onPressed: _logout,
+                        child: const Text("Non sei tu? Esci", style: TextStyle(color: Colors.grey)),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
