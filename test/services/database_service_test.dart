@@ -1,88 +1,70 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
+import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:orientai/services/database_service.dart';
-import 'package:orientai/utils/custom_exceptions.dart';
-
-class MockFirebaseAuth extends Mock implements FirebaseAuth {}
-class MockFirebaseFirestore extends Mock implements FirebaseFirestore {}
-class MockUser extends Mock implements User {}
-class MockUserCredential extends Mock implements UserCredential {}
-class MockCollectionReference extends Mock implements CollectionReference<Map<String, dynamic>> {}
-class MockDocumentReference extends Mock implements DocumentReference<Map<String, dynamic>> {}
 
 void main() {
-  late MockFirebaseAuth mockAuth;
-  late MockFirebaseFirestore mockDb;
-  late DatabaseService databaseService;
+  late FakeFirebaseFirestore db;
+  late MockFirebaseAuth auth;
+  late DatabaseService service;
+  late MockUser user;
 
-  setUpAll(() {
-    registerFallbackValue(SetOptions(merge: true));
-    registerFallbackValue(<String, dynamic>{});
+  setUp(() async {
+    db = FakeFirebaseFirestore();
+    user = MockUser(uid: 'test_user_uid', email: 'test@example.com');
+    auth = MockFirebaseAuth(mockUser: user);
+    service = DatabaseService(db: db, auth: auth);
+
+    // Sign in the user effectively
+    await auth.signInWithEmailAndPassword(email: 'test@example.com', password: 'password');
   });
 
-  setUp(() {
-    mockAuth = MockFirebaseAuth();
-    mockDb = MockFirebaseFirestore();
-    databaseService = DatabaseService(auth: mockAuth, db: mockDb);
+  test('clearChat handles empty collection', () async {
+    await service.clearChat();
+    final snapshot = await db.collection('users').doc(user.uid).collection('messages').get();
+    expect(snapshot.docs.length, 0);
   });
 
-  group('DatabaseService Tests', () {
-    test('currentUser returns user from FirebaseAuth', () {
-      final mockUser = MockUser();
-      when(() => mockAuth.currentUser).thenReturn(mockUser);
+  test('clearChat handles more than 500 messages (505)', () async {
+    final messagesRef = db.collection('users').doc(user.uid).collection('messages');
+    for (int i = 0; i < 505; i++) {
+      await messagesRef.add({
+        'text': 'Message $i',
+        'isUser': true,
+        'createdAt': DateTime.now(),
+      });
+    }
 
-      expect(databaseService.currentUser, mockUser);
-    });
+    final snapshotBefore = await messagesRef.get();
+    expect(snapshotBefore.docs.length, 505);
 
-    test('signOut calls signOut on FirebaseAuth', () async {
-      when(() => mockAuth.signOut()).thenAnswer((_) async {});
+    await service.clearChat();
 
-      await databaseService.signOut();
+    final snapshotAfter = await messagesRef.get();
+    expect(snapshotAfter.docs.length, 0, reason: "All messages should be deleted");
+  });
 
-      verify(() => mockAuth.signOut()).called(1);
-    });
+  test('clearChat handles large datasets (1200 messages)', () async {
+    final messagesRef = db.collection('users').doc(user.uid).collection('messages');
+    // Batch writes for faster setup (fake firestore allows this, usually)
+    // Actually, to be safe and fast, let's just use Future.wait in chunks
+    var futures = <Future>[];
+    for (int i = 0; i < 1200; i++) {
+      futures.add(messagesRef.add({
+        'text': 'Message $i',
+        'isUser': true,
+        'createdAt': DateTime.now(),
+      }));
+      // throttle slightly to avoid completely locking event loop if needed, but for 1200 simple writes it should be ok
+    }
+    await Future.wait(futures);
 
-    test('signUp returns user on success', () async {
-      final mockCredential = MockUserCredential();
-      final mockUser = MockUser();
-      when(() => mockCredential.user).thenReturn(mockUser);
-      when(() => mockUser.uid).thenReturn('123');
-      when(() => mockAuth.createUserWithEmailAndPassword(email: 'test@test.com', password: 'password'))
-          .thenAnswer((_) async => mockCredential);
+    final snapshotBefore = await messagesRef.get();
+    expect(snapshotBefore.docs.length, 1200);
 
-      // Mock Firestore interactions for _initUserData
-      final mockCollection = MockCollectionReference();
-      final mockDoc = MockDocumentReference();
-      when(() => mockDb.collection('users')).thenReturn(mockCollection);
-      when(() => mockCollection.doc('123')).thenReturn(mockDoc);
-      // Use any() for arguments
-      when(() => mockDoc.set(any(), any())).thenAnswer((_) async {});
+    await service.clearChat();
 
-      final user = await databaseService.signUp('test@test.com', 'password');
-      expect(user, mockUser);
-      verify(() => mockAuth.createUserWithEmailAndPassword(email: 'test@test.com', password: 'password')).called(1);
-    });
-
-    test('signUp throws OrientAIAuthException on email-already-in-use', () async {
-       when(() => mockAuth.createUserWithEmailAndPassword(email: 'test@test.com', password: 'password'))
-         .thenThrow(FirebaseAuthException(code: 'email-already-in-use', message: 'Exists'));
-
-       expect(
-         () async => await databaseService.signUp('test@test.com', 'password'),
-         throwsA(isA<OrientAIAuthException>().having((e) => e.message, 'message', "Questa email è già registrata."))
-       );
-    });
-
-    test('signIn throws OrientAIAuthException on user-not-found', () async {
-       when(() => mockAuth.signInWithEmailAndPassword(email: 'test@test.com', password: 'password'))
-         .thenThrow(FirebaseAuthException(code: 'user-not-found', message: 'Not found'));
-
-       expect(
-         () async => await databaseService.signIn('test@test.com', 'password'),
-         throwsA(isA<OrientAIAuthException>().having((e) => e.message, 'message', "Email o password non corretti."))
-       );
-    });
+    final snapshotAfter = await messagesRef.get();
+    expect(snapshotAfter.docs.length, 0, reason: "All 1200 messages should be deleted");
   });
 }

@@ -2,10 +2,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:orientai/services/ai_service.dart';
+import 'package:orientai/utils/ai_wrappers.dart';
 
-class MockGenerativeModel extends Mock implements GenerativeModel {}
-class MockChatSession extends Mock implements ChatSession {}
-class MockGenerateContentResponse extends Mock implements GenerateContentResponse {}
+class MockGenerativeModel extends Mock implements GenerativeModelWrapper {}
+class MockChatSession extends Mock implements ChatSessionWrapper {}
+class MockGenerateContentResponse extends Mock implements GenerateContentResponseWrapper {}
 
 void main() {
   late OrientAIService aiService;
