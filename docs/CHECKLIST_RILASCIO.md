@@ -23,9 +23,12 @@ Questa checklist guida il processo di pubblicazione della prima versione (V1.0) 
 *   [ ] **Obfuscation:** Abilitare R8/ProGuard in `android/app/build.gradle` (`minifyEnabled true` per release).
 
 ## 💰 4. Monetizzazione (AdMob)
-*   [ ] **app-ads.txt:** Creare e hostare il file `app-ads.txt` sul dominio dello sviluppatore (o sito web app).
+*   [ ] **app-ads.txt:** Creare e hostare il file `app-ads.txt` sul dominio dello sviluppatore (o sito web app). È essenziale per proteggere le entrate.
 *   [ ] **Ad Units Reali:** Sostituire le unità pubblicitarie di test (utilizzate in `main.dart`) con quelle reali create su AdMob Console.
 *   [ ] **Payment Profile:** Completare il profilo pagamenti su Google Play Console e AdMob.
+*   [ ] **Reduced Fee Tier (15%):**
+    *   Google Play Console: Iscriversi al "15% service fee tier" (Developer Profile -> Associated Developer Accounts).
+    *   App Store: Iscriversi all'App Store Small Business Program.
 
 ## 🧪 5. Final Smoke Test
 *   [ ] Installare la build `release` su un dispositivo fisico reale.
