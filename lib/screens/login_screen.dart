@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/database_service.dart';
 import '../utils/custom_exceptions.dart';
+import '../utils/validators.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -37,9 +38,8 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    // Use a more permissive regex to support modern TLDs and aliases
-    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
-    if (!emailRegex.hasMatch(email)) {
+    // 🔒 Sentinel Security Check: Stricter Regex for Input Validation
+    if (!Validators.emailRegex.hasMatch(email)) {
       setState(() {
         _isLoading = false;
         _errorMessage = "Inserisci un'email valida.";
@@ -112,8 +112,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
               TextField(
                 controller: _emailController,
+                maxLength: 100, // 🔒 Sentinel: Prevent DoS
                 decoration: const InputDecoration(
                   labelText: "Email",
+                  counterText: "", // Enforce limit but hide visual counter
                   border: OutlineInputBorder(),
                   filled: true,
                   fillColor: Colors.white,
@@ -126,8 +128,10 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 16),
               TextField(
                 controller: _passwordController,
+                maxLength: 64, // 🔒 Sentinel: Prevent DoS
                 decoration: InputDecoration(
                   labelText: "Password",
+                  counterText: "",
                   border: const OutlineInputBorder(),
                   filled: true,
                   fillColor: Colors.white,

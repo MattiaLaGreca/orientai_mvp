@@ -7,3 +7,8 @@
 **Vulnerability:** Raw exception logging (`print(e)`) in the service layer could potentially expose sensitive API Keys if the exception message (e.g., from an HTTP client) includes the request URL or headers.
 **Learning:** Standard exception strings are not safe for production logs when handling sensitive third-party integrations.
 **Prevention:** Implement a dedicated secure logging wrapper (`_logSecurely`) that explicitly sanitizes/redacts known secrets from error messages before outputting them.
+
+## 2024-05-25 - Centralized Input Validation Pattern
+**Vulnerability:** Ad-hoc regex validation in UI widgets led to inconsistent security rules and made it impossible to unit test the validation logic accurately (testing the string copy instead of the code).
+**Learning:** Security logic (validators, sanitizers) must be decoupled from UI components. Embedding regex strings in widgets makes them hard to test and maintain.
+**Prevention:** Extract all validation logic into a shared `lib/utils/validators.dart` module. This ensures the UI and the Tests rely on the exact same source of truth.
