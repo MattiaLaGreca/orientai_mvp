@@ -2,6 +2,13 @@
 
 Questo documento serve come punto di ingresso per la documentazione di OrientAI. Definisce la missione, l'architettura tecnica e rimanda ai documenti operativi specifici.
 
+## 📊 Status Progetto
+**Fase Attuale:** Pre-Release (Release Engineering)
+*   Il focus attuale è sulla preparazione del primo rilascio pubblico (V1.0) per Android.
+*   Priorità: Configurazione Build, Firma Digitale, Conformità Legale, Assets Store.
+
+---
+
 ## 🎯 Missione: Active Assistant
 **OrientAI** non è solo una chat, ma un **Assistente Attivo** per l'orientamento scolastico e universitario.
 L'obiettivo è fornire consigli personalizzati e proattivi ("Smart Retention"), aiutando gli studenti italiani a navigare le complessità della scelta universitaria con un tono professionale ma accessibile (e tatticamente "gamificato" dove serve).
@@ -9,9 +16,10 @@ L'obiettivo è fornire consigli personalizzati e proattivi ("Smart Retention"), 
 ---
 
 ## 📚 Documentazione Operativa
-*   **[ROADMAP TECNICA](docs/ROADMAP_TECNICA.md)**: Il piano di sviluppo dettagliato (Test, Multimodalità, RAG).
-*   **[CHECKLIST DI RILASCIO](docs/CHECKLIST_RILASCIO.md)**: I passi necessari per pubblicare sullo store (Legale, Asset, Build).
-*   **[STRATEGIA FINANZIARIA](STRATEGIA_FINANZIARIA.md)**: Analisi costi/ricavi e monetizzazione.
+*   **[ROADMAP TECNICA](docs/ROADMAP_TECNICA.md)**: Il piano di sviluppo dettagliato (Stability, Release Prep, Core Features).
+*   **[MANUALE DI RILASCIO](docs/MANUALE_RILASCIO.md)**: Guida tecnica per compilare, firmare e pubblicare l'app.
+*   **[CHECKLIST DI RILASCIO](docs/CHECKLIST_RILASCIO.md)**: Lista di controllo per asset, aspetti legali e configurazioni finali.
+*   **[STRATEGIA SOSTENIBILITÀ](docs/STRATEGIA_SOSTENIBILITA.md)**: Analisi costi/ricavi, gestione token e monetizzazione.
 
 ---
 
