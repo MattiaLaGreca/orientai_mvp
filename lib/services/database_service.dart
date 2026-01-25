@@ -287,4 +287,36 @@ class DatabaseService {
       await batch.commit();
     }
   }
+
+  // --- 4. GESTIONE ACCOUNT ---
+
+  Future<void> deleteAccount() async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    try {
+      // 1. Cancella Cronologia Chat
+      await clearChat();
+
+      // 2. Cancella Profilo Utente
+      await _db.collection('users').doc(user.uid).delete();
+
+      // 3. Cancella Account Auth
+      await user.delete();
+    } on FirebaseAuthException catch (e) {
+      SecureLogger.log("DeleteAccount Firebase Error", e);
+      if (e.code == 'requires-recent-login') {
+        throw OrientAIAuthException(
+          "Per sicurezza, devi effettuare nuovamente il login prima di eliminare l'account.",
+          code: e.code
+        );
+      }
+      throw OrientAIAuthException("Impossibile eliminare l'account. Riprova più tardi.", code: e.code);
+    } catch (e) {
+      SecureLogger.log("DeleteAccount Generic Error", e);
+      // Rilancia come AuthException per gestirlo uniformemente nella UI
+      if (e is OrientAIAuthException) rethrow;
+      throw OrientAIAuthException("Si è verificato un errore durante l'eliminazione dell'account.");
+    }
+  }
 }
