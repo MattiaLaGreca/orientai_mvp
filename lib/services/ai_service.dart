@@ -1,16 +1,17 @@
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:orientai/secrets.dart';
 import '../utils/secure_logger.dart';
+import '../utils/ai_wrappers.dart';
 
 class OrientAIService {
   // ⚠️ IMPORTANTE: Assicurati che qui ci sia la tua API KEY corretta!
   static const String _apiKey = GEMINI_API_KEY;
   
-  late final GenerativeModel _model;
-  late final ChatSession _chat;
+  late final GenerativeModelWrapper _model;
+  late final ChatSessionWrapper _chat;
 
   // MODIFICA: Ora init accetta isPremium
-  void init(String studentName, String promptDetails, bool isPremium, {GenerativeModel? modelOverride, ChatSession? chatOverride}) {
+  void init(String studentName, String promptDetails, bool isPremium, {GenerativeModelWrapper? modelOverride, ChatSessionWrapper? chatOverride}) {
     
     // Update Models: Gemini 2.5 Flash Lite (Free) and 2.5 Pro (Premium)
     // 2.5 Flash Lite is highly cost-effective ($0.10/1M input).
@@ -36,11 +37,16 @@ Se disponibile ti fornirò un sommario della chat precedente (Profilo, Contesto,
 Usa queste informazioni per riprendere la conversazione in modo naturale, dimostrando di ricordare cosa è stato detto.
 ''';
 
-    _model = modelOverride ?? GenerativeModel(
-      model: modelName,
-      apiKey: _apiKey,
-      systemInstruction: Content.system(optimizedInstruction),
-    );
+    if (modelOverride != null) {
+      _model = modelOverride;
+    } else {
+      final realModel = GenerativeModel(
+        model: modelName,
+        apiKey: _apiKey,
+        systemInstruction: Content.system(optimizedInstruction),
+      );
+      _model = RealGenerativeModel(realModel);
+    }
 
     _chat = chatOverride ?? _model.startChat();
   }
