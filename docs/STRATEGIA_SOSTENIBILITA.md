@@ -50,7 +50,11 @@ Dato che gli studenti hanno bassa disponibilità economica, monetizzare *solo* l
 ### C. Bandi e Grant
 *   Monitorare "Smart & Start Italia" o bandi regionali per l'innovazione digitale e l'istruzione. Spesso coprono costi a fondo perduto.
 
-## 4. Strategia di Pubblicazione
+## 4. Strategia di Pubblicazione e Marketing
+
+### Marketing a Costo Zero
+*   **TikTok / Instagram Reels**: Creare contenuti brevi che mostrano risposte divertenti o "shocking" dell'AI su facoltà universitarie. È il canale principale per il target Gen Z.
+*   **Gruppi Telegram/Discord Studenteschi**: Promozione organica nelle community di maturandi.
 
 ### ASO (App Store Optimization)
 Prima di spendere in ads, ottimizzare la scheda store:
