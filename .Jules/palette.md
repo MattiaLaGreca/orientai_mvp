@@ -5,3 +5,7 @@
 ## 2026-01-24 - Frictionless Forms
 **Learning:** Users expect forms to work seamlessly with password managers and keyboard navigation (Next/Done).
 **Action:** Always wrap login/register forms in `AutofillGroup` and explicitly set `textInputAction` and `autofillHints` on inputs.
+
+## 2026-01-25 - Frictionless Onboarding
+**Learning:** Users expect the same frictionless keyboard navigation in onboarding as in login screens.
+**Action:** Apply `textInputAction` (Next/Done) and `onSubmitted` handlers to all form sequences, not just authentication.
