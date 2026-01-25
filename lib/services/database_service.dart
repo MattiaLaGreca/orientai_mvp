@@ -273,18 +273,17 @@ class DatabaseService {
     final user = _auth.currentUser;
     if (user == null) return;
     
-    final collection = _db.collection('users').doc(user.uid).collection('messages');
-
-    // Elimina a blocchi di 500 per rispettare i limiti di Firestore e ottimizzare la memoria
-    while (true) {
-      final snapshot = await collection.limit(500).get();
-      if (snapshot.docs.isEmpty) break;
-
+    try {
       final batch = _db.batch();
-      for (var doc in snapshot.docs) {
+      final snapshots = await _db.collection('users').doc(user.uid).collection('messages').get();
+
+      for (var doc in snapshots.docs) {
         batch.delete(doc.reference);
       }
       await batch.commit();
+    } catch (e) {
+      SecureLogger.log("ClearChat Error", e);
+      throw OrientAIDataException("Impossibile cancellare la chat.");
     }
   }
 }
