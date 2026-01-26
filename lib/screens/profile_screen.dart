@@ -187,153 +187,179 @@ class _ProfileScreenState extends State<ProfileScreen> {
         foregroundColor: Colors.indigo,
         elevation: 0,
       ),
-      body: _isLoading 
-        ? const Center(child: CircularProgressIndicator()) 
-        : SingleChildScrollView(
+      body: Stack(
+        children: [
+          SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: Form(
               key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Text(
-                    "Modifica Dati",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.indigo),
-                  ),
-                  const SizedBox(height: 20),
-                  
-                  // Nome
-                  TextFormField(
-                    controller: _nameController,
-                    decoration: const InputDecoration(
-                      labelText: "Nome",
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.person),
+              child: AutofillGroup(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Text(
+                      "Modifica Dati",
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.indigo),
                     ),
-                    validator: (v) => v!.isEmpty ? "Inserisci il nome" : null,
-                  ),
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 20),
 
-                  // Scuola
-                  DropdownButtonFormField<String>(
-                    initialValue: _selectedSchool,
-                    decoration: const InputDecoration(
-                      labelText: "Scuola Attuale",
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.school),
+                    // Nome
+                    TextFormField(
+                      controller: _nameController,
+                      textCapitalization: TextCapitalization.words,
+                      textInputAction: TextInputAction.next,
+                      autofillHints: const [AutofillHints.name],
+                      decoration: const InputDecoration(
+                        labelText: "Nome",
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.person),
+                      ),
+                      validator: (v) => v!.isEmpty ? "Inserisci il nome" : null,
                     ),
-                    items: _schools.map((String school) {
-                      return DropdownMenuItem(value: school, child: Text(school));
-                    }).toList(),
-                    onChanged: (val) => setState(() => _selectedSchool = val!),
-                  ),
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
-                  // Interessi
-                  TextFormField(
-                    controller: _interestsController,
-                    decoration: const InputDecoration(
-                      labelText: "Interessi e Passioni",
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.favorite),
+                    // Scuola
+                    DropdownButtonFormField<String>(
+                      initialValue: _selectedSchool,
+                      decoration: const InputDecoration(
+                        labelText: "Scuola Attuale",
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.school),
+                      ),
+                      items: _schools.map((String school) {
+                        return DropdownMenuItem(value: school, child: Text(school));
+                      }).toList(),
+                      onChanged: (val) => setState(() => _selectedSchool = val!),
                     ),
-                    maxLines: 2,
-                    validator: (v) => v!.isEmpty ? "Inserisci i tuoi interessi" : null,
-                  ),
-                  const SizedBox(height: 24),
+                    const SizedBox(height: 16),
 
-                  // Tasto Salva
-                  ElevatedButton(
-                    onPressed: _updateProfile,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.indigo,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    // Interessi
+                    TextFormField(
+                      controller: _interestsController,
+                      textInputAction: TextInputAction.done,
+                      onFieldSubmitted: (_) => _updateProfile(),
+                      decoration: const InputDecoration(
+                        labelText: "Interessi e Passioni",
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.favorite),
+                      ),
+                      maxLines: 2,
+                      validator: (v) =>
+                          v!.isEmpty ? "Inserisci i tuoi interessi" : null,
                     ),
-                    child: const Text("Salva Modifiche"),
-                  ),
+                    const SizedBox(height: 24),
 
-                  const Divider(height: 40, thickness: 1),
-
-                  const Text(
-                    "Sostieni il Progetto",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.indigo),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    "OrientAI è un progetto indipendente. Se ti è stato utile, considera una piccola donazione per coprire i costi dei server.",
-                    style: TextStyle(fontSize: 14, color: Colors.black54),
-                  ),
-                  const SizedBox(height: 12),
-                  ElevatedButton.icon(
-                    onPressed: _launchSupport,
-                    icon: const Icon(Icons.coffee),
-                    label: const Text("Offrici un Caffè"),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.amber[800],
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    // Tasto Salva
+                    ElevatedButton(
+                      onPressed: _updateProfile,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.indigo,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                      child: const Text("Salva Modifiche"),
                     ),
-                  ),
 
-                  const Divider(height: 40, thickness: 1),
+                    const Divider(height: 40, thickness: 1),
 
-                  const Text(
-                    "Gestione Account",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.indigo),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Tasto Privacy
-                  TextButton.icon(
-                    onPressed: _launchPrivacy,
-                    icon: const Icon(Icons.privacy_tip_outlined),
-                    label: const Text("Privacy Policy"),
-                    style: TextButton.styleFrom(foregroundColor: Colors.indigo),
-                  ),
-
-                  // Tasto Cancella Chat
-                  OutlinedButton.icon(
-                    onPressed: _clearChatHistory,
-                    icon: const Icon(Icons.delete_outline, color: Colors.red),
-                    label: const Text("Cancella Cronologia Chat", style: TextStyle(color: Colors.red)),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      side: const BorderSide(color: Colors.red),
+                    const Text(
+                      "Sostieni il Progetto",
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.indigo),
                     ),
-                  ),
-                  
-                  const SizedBox(height: 12),
-
-                  // Tasto Logout
-                  TextButton.icon(
-                    onPressed: _logout,
-                    icon: const Icon(Icons.logout),
-                    label: const Text("Esci dall'account"),
-                    style: TextButton.styleFrom(foregroundColor: Colors.grey[700]),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                   // Tasto Elimina Account
-                  TextButton.icon(
-                    onPressed: _deleteAccount,
-                    icon: const Icon(Icons.warning_amber_rounded, color: Colors.red),
-                    label: const Text("Elimina Account", style: TextStyle(color: Colors.red)),
-                  ),
-
-                  const SizedBox(height: 30),
-
-                  Center(
-                    child: Text(
-                      "Versione $_appVersion",
-                      style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                    const SizedBox(height: 8),
+                    const Text(
+                      "OrientAI è un progetto indipendente. Se ti è stato utile, considera una piccola donazione per coprire i costi dei server.",
+                      style: TextStyle(fontSize: 14, color: Colors.black54),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 12),
+                    ElevatedButton.icon(
+                      onPressed: _launchSupport,
+                      icon: const Icon(Icons.coffee),
+                      label: const Text("Offrici un Caffè"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.amber[800],
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                    ),
+
+                    const Divider(height: 40, thickness: 1),
+
+                    const Text(
+                      "Gestione Account",
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.indigo),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Tasto Privacy
+                    TextButton.icon(
+                      onPressed: _launchPrivacy,
+                      icon: const Icon(Icons.privacy_tip_outlined),
+                      label: const Text("Privacy Policy"),
+                      style: TextButton.styleFrom(foregroundColor: Colors.indigo),
+                    ),
+
+                    // Tasto Cancella Chat
+                    OutlinedButton.icon(
+                      onPressed: _clearChatHistory,
+                      icon: const Icon(Icons.delete_outline, color: Colors.red),
+                      label: const Text("Cancella Cronologia Chat",
+                          style: TextStyle(color: Colors.red)),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        side: const BorderSide(color: Colors.red),
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // Tasto Logout
+                    TextButton.icon(
+                      onPressed: _logout,
+                      icon: const Icon(Icons.logout),
+                      label: const Text("Esci dall'account"),
+                      style: TextButton.styleFrom(foregroundColor: Colors.grey[700]),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // Tasto Elimina Account
+                    TextButton.icon(
+                      onPressed: _deleteAccount,
+                      icon: const Icon(Icons.warning_amber_rounded,
+                          color: Colors.red),
+                      label: const Text("Elimina Account",
+                          style: TextStyle(color: Colors.red)),
+                    ),
+
+                    const SizedBox(height: 30),
+
+                    Center(
+                      child: Text(
+                        "Versione $_appVersion",
+                        style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
+          if (_isLoading) ...[
+            const ModalBarrier(dismissible: false, color: Colors.black12),
+            const Center(child: CircularProgressIndicator()),
+          ],
+        ],
+      ),
     );
   }
 }
