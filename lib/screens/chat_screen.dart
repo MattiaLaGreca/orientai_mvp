@@ -5,6 +5,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../services/ai_service.dart';
 import '../services/database_service.dart';
 import '../utils/secure_logger.dart';
+import '../utils/validators.dart';
 import 'profile_screen.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -132,7 +133,24 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _handleSend() async {
-    final text = _controller.text.trim();
+    // 🔒 Sentinel Security: Input Sanitization
+    var text = _controller.text;
+
+    // 1. Enforce Max Length (DoS protection)
+    if (text.length > 2000) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Messaggio troppo lungo (max 2000 caratteri)."),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
+    }
+
+    // 2. Sanitize Input (remove control chars & trim)
+    text = Validators.cleanMessage(text);
     if (text.isEmpty) return;
 
     _controller.clear();
