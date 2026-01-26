@@ -9,3 +9,7 @@
 ## 2026-01-25 - Frictionless Onboarding
 **Learning:** Users expect the same frictionless keyboard navigation in onboarding as in login screens.
 **Action:** Apply `textInputAction` (Next/Done) and `onSubmitted` handlers to all form sequences, not just authentication.
+
+## 2026-01-26 - Contextual Loading
+**Learning:** Replacing the entire screen with a loading spinner causes users to lose context of their action.
+**Action:** Use a `Stack` with a `ModalBarrier` (or disabled buttons) to keep the form visible while blocking interaction during async operations.
