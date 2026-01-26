@@ -4,6 +4,7 @@ Questo documento serve come punto di ingresso per la documentazione di OrientAI.
 
 ## 📊 Status Progetto
 **Fase Attuale:** Pre-Release (Release Engineering)
+*   **[VEDI STATUS REPORT COMPLETO](docs/STATUS_REPORT.md)**
 *   Il focus attuale è sulla preparazione del primo rilascio pubblico (V1.0) per Android.
 *   Priorità: Configurazione Build, Firma Digitale, Conformità Legale, Assets Store.
 

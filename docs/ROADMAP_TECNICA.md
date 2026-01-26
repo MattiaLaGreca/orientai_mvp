@@ -6,14 +6,14 @@ Questo documento definisce il percorso tecnico per portare OrientAI al rilascio 
 *Obiettivo: Garantire che l'app non crashi e sia sicura prima di arrivare nelle mani degli utenti.*
 
 ### 1.1 Testing Infrastructure
-*   [ ] **Unit Tests:** Estendere la copertura test per `OrientAIService` (mockando le risposte di Gemini) e `DatabaseService`.
+*   [x] **Unit Tests:** Estendere la copertura test per `OrientAIService` (mockando le risposte di Gemini) e `DatabaseService`.
 *   [ ] **Widget Tests:** Testare il rendering della `ChatScreen` e la gestione degli errori (es. timeout di rete).
 *   [ ] **Integration Tests:** (Opzionale per V1) Testare il flusso completo Login -> Chat.
 
 ### 1.2 Gestione Errori e Sicurezza
-*   [ ] **API Key Rotation:** Definire una strategia per la rotazione delle chiavi API (attualmente in `lib/secrets.dart`).
-*   [ ] **User-Facing Error Messages:** Assicurarsi che nessuna eccezione tecnica (stack trace) venga mostrata all'utente. Utilizzare messaggi empatici ("Ops, mi sono distratto un attimo...").
-*   [ ] **Privacy Logs:** Verificare che nessun dato sensibile (PII) venga loggato in console in produzione.
+*   [x] **API Key Rotation:** Definire una strategia per la rotazione delle chiavi API (attualmente in `lib/secrets.dart`).
+*   [x] **User-Facing Error Messages:** Assicurarsi che nessuna eccezione tecnica (stack trace) venga mostrata all'utente. Utilizzare messaggi empatici ("Ops, mi sono distratto un attimo...").
+*   [x] **Privacy Logs:** Verificare che nessun dato sensibile (PII) venga loggato in console in produzione.
 
 ---
 
@@ -22,11 +22,11 @@ Questo documento definisce il percorso tecnico per portare OrientAI al rilascio 
 
 ### 1.5.1 Build Configuration
 *   [ ] **Keystore Management:** Generare la chiave di upload/release (`.jks`) e configurare `key.properties`.
-*   [ ] **Version Bumping:** Gestire il versionamento semantico in `pubspec.yaml` (es. `1.0.0+1`).
+*   [x] **Version Bumping:** Gestire il versionamento semantico in `pubspec.yaml` (es. `1.0.0+1`).
 *   [ ] **Obfuscation:** Verificare configurazione ProGuard/R8 per la build release.
 
 ### 1.5.2 Legal & Compliance
-*   [ ] **Privacy Policy:** Generare e ospitare la policy (link in app e sullo store).
+*   [x] **Privacy Policy:** Generare e ospitare la policy (link in app e sullo store).
 *   [ ] **GDPR Consent:** Verifica implementazione UMP SDK per AdMob.
 
 ### 1.5.3 Store Assets
