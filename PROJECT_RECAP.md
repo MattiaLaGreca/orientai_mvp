@@ -16,10 +16,17 @@ L'obiettivo è fornire consigli personalizzati e proattivi ("Smart Retention"), 
 ---
 
 ## 📚 Documentazione Operativa
-*   **[ROADMAP TECNICA](docs/ROADMAP_TECNICA.md)**: Il piano di sviluppo dettagliato (Stability, Release Prep, Core Features).
-*   **[MANUALE DI RILASCIO](docs/MANUALE_RILASCIO.md)**: Guida tecnica per compilare, firmare e pubblicare l'app.
-*   **[CHECKLIST DI RILASCIO](docs/CHECKLIST_RILASCIO.md)**: Lista di controllo per asset, aspetti legali e configurazioni finali.
-*   **[STRATEGIA SOSTENIBILITÀ](docs/STRATEGIA_SOSTENIBILITA.md)**: Analisi costi/ricavi, gestione token e monetizzazione.
+
+### 🚀 Release Management (V1.0)
+*   **[PIANO OPERATIVO RILASCIO](docs/PIANO_OPERATIVO_RILASCIO.md)**: ⭐️ **Start Here**. Il workflow cronologico per il lancio.
+*   **[PIANO TEST UAT](docs/PIANO_TEST_UAT.md)**: Sceneggiatura per il test manuale (Smoke Test).
+*   **[KIT STORE](docs/KIT_STORE.md)**: Testi e checklist per la scheda Google Play.
+*   **[MANUALE DI RILASCIO](docs/MANUALE_RILASCIO.md)**: Guida tecnica per compilare e firmare l'APK/AAB.
+
+### 📐 Strategia & Sviluppo
+*   **[ROADMAP TECNICA](docs/ROADMAP_TECNICA.md)**: Visione a lungo termine e fasi di sviluppo.
+*   **[STRATEGIA SOSTENIBILITÀ](docs/STRATEGIA_SOSTENIBILITA.md)**: Analisi costi/ricavi e monetizzazione.
+*   **[CHECKLIST DI RILASCIO](docs/CHECKLIST_RILASCIO.md)**: (Legacy) Lista di controllo puntuale.
 
 ---
 
