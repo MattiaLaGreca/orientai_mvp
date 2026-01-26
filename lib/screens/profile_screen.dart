@@ -110,7 +110,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _launchSupport() async {
-    final Uri url = Uri.parse('https://ko-fi.com'); // Placeholder URL
+    // TODO: Sostituisci questo link con il tuo URL reale (es. https://ko-fi.com/tuo_nome_utente)
+    // Questo è un modo "zero-commission" per ricevere supporto diretto dagli utenti.
+    final Uri url = Uri.parse('https://ko-fi.com');
     try {
       if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
         throw 'Could not launch $url';

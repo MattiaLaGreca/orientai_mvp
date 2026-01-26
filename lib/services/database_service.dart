@@ -224,6 +224,11 @@ class DatabaseService {
         query = query.where('createdAt', isGreaterThan: Timestamp.fromDate(since));
       }
 
+      // OTTIMIZZAZIONE COSTI: Limitiamo il recupero a max 30 messaggi per sessione
+      // per risparmiare letture Firestore e token di input Gemini.
+      // Il contesto storico più vecchio è gestito dal Summary.
+      query = query.limit(30);
+
       final snapshot = await query.get();
 
       await updateSessionStart();
