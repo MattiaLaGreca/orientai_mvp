@@ -13,3 +13,7 @@
 ## 2026-01-26 - Contextual Loading
 **Learning:** Replacing the entire screen with a loading spinner causes users to lose context of their action.
 **Action:** Use a `Stack` with a `ModalBarrier` (or disabled buttons) to keep the form visible while blocking interaction during async operations.
+
+## 2026-02-27 - Chat Input Experience
+**Learning:** Default single-line text fields are frustrating for chat applications as they hide long messages horizontally.
+**Action:** Configure chat inputs with `minLines: 1`, `maxLines: 4`, and `textCapitalization: TextCapitalization.sentences` to improve visibility and typing speed.
