@@ -198,7 +198,7 @@ class DatabaseService {
           .orderBy('createdAt', descending: true);
 
       if (!isPremium) {
-        query.limit(10);
+        query = query.limit(10);
       }
       return query.snapshots();
     } catch (e) {
