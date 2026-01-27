@@ -18,4 +18,25 @@ class Validators {
 
     return output;
   }
+
+  /// 🔒 Sentinel Security: Validates Name
+  /// - Max length: 50
+  /// - No control characters (incl. newlines) to prevent Prompt Injection
+  static String? validateName(String? value) {
+    if (value == null || value.trim().isEmpty) return "Inserisci il nome";
+    if (value.length > 50) return "Nome troppo lungo (max 50 caratteri)";
+    // Disallow ALL control characters including \n, \r, \t
+    if (RegExp(r'[\x00-\x1F\x7F]').hasMatch(value)) {
+      return "Il nome non può contenere caratteri speciali o 'a capo'";
+    }
+    return null;
+  }
+
+  /// 🔒 Sentinel Security: Validates Interests
+  /// - Max length: 500
+  static String? validateInterests(String? value) {
+    if (value == null || value.trim().isEmpty) return "Inserisci i tuoi interessi";
+    if (value.length > 500) return "Testo troppo lungo (max 500 caratteri)";
+    return null;
+  }
 }

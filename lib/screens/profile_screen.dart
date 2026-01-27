@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../utils/validators.dart';
 import '../services/database_service.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -217,7 +218,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.person),
                       ),
-                      validator: (v) => v!.isEmpty ? "Inserisci il nome" : null,
+                      validator: Validators.validateName,
                     ),
                     const SizedBox(height: 16),
 
@@ -247,8 +248,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         prefixIcon: Icon(Icons.favorite),
                       ),
                       maxLines: 2,
-                      validator: (v) =>
-                          v!.isEmpty ? "Inserisci i tuoi interessi" : null,
+                      validator: Validators.validateInterests,
                     ),
                     const SizedBox(height: 24),
 
