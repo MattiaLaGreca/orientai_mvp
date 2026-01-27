@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/validators.dart';
 import '../services/database_service.dart';
 import 'chat_screen.dart';
 
@@ -17,6 +18,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final DatabaseService _dbService = DatabaseService();
   bool _isLoading = false;
   String? _nameError;
+  String? _interestsError;
 
   final List<String> _schools = [
     'Liceo Scientifico',
@@ -28,10 +30,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   ];
 
   void _saveAndStart() async {
-    final name = _nameController.text.trim();
-    if (name.isEmpty) {
+    final name = _nameController.text;
+    final interests = _interestsController.text;
+
+    final nameValidation = Validators.validateName(name);
+    final interestsValidation = Validators.validateInterests(interests);
+
+    if (nameValidation != null || interestsValidation != null) {
       setState(() {
-        _nameError = "Inserisci il tuo nome";
+        _nameError = nameValidation;
+        _interestsError = interestsValidation;
       });
       return;
     }
@@ -143,11 +151,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         controller: _interestsController,
                         textInputAction: TextInputAction.done,
                         onSubmitted: (_) => _saveAndStart(),
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: "Interessi? (Es. Videogiochi, Arte)",
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.favorite),
+                          border: const OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.favorite),
+                          errorText: _interestsError,
                         ),
+                        onChanged: (value) {
+                          if (_interestsError != null) {
+                            setState(() {
+                              _interestsError = null;
+                            });
+                          }
+                        },
                       ),
                       const SizedBox(height: 24),
 

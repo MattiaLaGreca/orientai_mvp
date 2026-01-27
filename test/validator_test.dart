@@ -32,4 +32,46 @@ void main() {
       expect(emailRegex.hasMatch('test@example.com; DROP TABLE'), false);
     });
   });
+
+  group('Name Validator Security Tests', () {
+    test('Valid names should pass', () {
+      expect(Validators.validateName('Mario'), null);
+      expect(Validators.validateName('Maria Rossi'), null);
+      expect(Validators.validateName('O\'Connor'), null);
+    });
+
+    test('Empty name should fail', () {
+      expect(Validators.validateName(''), "Inserisci il nome");
+      expect(Validators.validateName('  '), "Inserisci il nome");
+      expect(Validators.validateName(null), "Inserisci il nome");
+    });
+
+    test('Long name should fail', () {
+      final longName = 'A' * 51;
+      expect(Validators.validateName(longName), "Nome troppo lungo (max 50 caratteri)");
+    });
+
+    test('Injection attempts (Newlines/Tabs) should fail', () {
+      // Prompt Injection prevention
+      expect(Validators.validateName('Mario\nRossi'), "Il nome non può contenere caratteri speciali o 'a capo'");
+      expect(Validators.validateName('Mario\tRossi'), "Il nome non può contenere caratteri speciali o 'a capo'");
+      expect(Validators.validateName('Sentinel\rAdmin'), "Il nome non può contenere caratteri speciali o 'a capo'");
+    });
+  });
+
+  group('Interests Validator Security Tests', () {
+    test('Valid interests should pass', () {
+      expect(Validators.validateInterests('Amo la matematica e la fisica.'), null);
+    });
+
+    test('Empty interests should fail', () {
+      expect(Validators.validateInterests(''), "Inserisci i tuoi interessi");
+      expect(Validators.validateInterests(null), "Inserisci i tuoi interessi");
+    });
+
+    test('Very long interests should fail', () {
+      final longText = 'A' * 501;
+      expect(Validators.validateInterests(longText), "Testo troppo lungo (max 500 caratteri)");
+    });
+  });
 }

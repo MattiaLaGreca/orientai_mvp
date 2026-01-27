@@ -12,3 +12,8 @@
 **Vulnerability:** Ad-hoc regex validation in UI widgets led to inconsistent security rules and made it impossible to unit test the validation logic accurately (testing the string copy instead of the code).
 **Learning:** Security logic (validators, sanitizers) must be decoupled from UI components. Embedding regex strings in widgets makes them hard to test and maintain.
 **Prevention:** Extract all validation logic into a shared `lib/utils/validators.dart` module. This ensures the UI and the Tests rely on the exact same source of truth.
+
+## 2026-02-28 - Prompt Injection via User Profile
+**Vulnerability:** The AI System Instruction interpolated user data (`$studentName`) directly. A malicious user could inject newlines and fake instructions into their name to override the AI's persona.
+**Learning:** Even simple profile fields like "Name" are attack vectors in LLM applications if they are injected into the system prompt.
+**Prevention:** Strictly validate inputs destined for Prompt Context. Forbid control characters (newlines, tabs) in short-text fields to prevent instruction boundary hopping.
