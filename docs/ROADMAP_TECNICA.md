@@ -7,13 +7,13 @@ Questo documento definisce il percorso tecnico per portare OrientAI al rilascio 
 
 ### 1.1 Testing Infrastructure
 *   [x] **Unit Tests:** Estendere la copertura test per `OrientAIService` (mockando le risposte di Gemini) e `DatabaseService`.
-*   [ ] **Widget Tests:** Testare il rendering della `ChatScreen` e la gestione degli errori (es. timeout di rete).
-*   [ ] **Integration Tests:** (Opzionale per V1) Testare il flusso completo Login -> Chat.
+*   [ ] **Widget Tests:** (Deferred to V1.1) Testare il rendering della `ChatScreen` e la gestione degli errori.
+*   [ ] **Integration Tests:** (Deferred to V1.1) Testare il flusso completo Login -> Chat.
 
 ### 1.2 Gestione Errori e Sicurezza
-*   [ ] **API Key Rotation:** Definire una strategia per la rotazione delle chiavi API (attualmente in `lib/secrets.dart`).
-*   [ ] **User-Facing Error Messages:** Assicurarsi che nessuna eccezione tecnica (stack trace) venga mostrata all'utente. Utilizzare messaggi empatici ("Ops, mi sono distratto un attimo...").
-*   [ ] **Privacy Logs:** Verificare che nessun dato sensibile (PII) venga loggato in console in produzione.
+*   [x] **API Key Isolation:** Segregazione delle chiavi API in `lib/secrets.dart` (non committato).
+*   [x] **User-Facing Error Messages:** Implementata gestione errori (`OrientAIException`) con messaggi user-friendly.
+*   [x] **Privacy Logs:** Implementato `SecureLogger` per sanitizzare i log in produzione.
 
 ---
 

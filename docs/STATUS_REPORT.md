@@ -1,6 +1,6 @@
 # Status Report - OrientAI
 
-**Data:** Febbraio 2026
+**Data:** Gennaio 2026
 **Versione:** 1.0.0+1
 **Fase:** Pre-Launch (MVP Ready)
 
@@ -9,6 +9,8 @@
 Il progetto è tecnicamente pronto per la generazione della build di rilascio (Release Candidate). Le funzionalità core sono stabili e testate.
 
 ## ✅ Completati Recentemente
+*   **Refactoring Core:** Migliorata la testabilità dei servizi (`OrientAIService`, `DatabaseService`) con Dependency Injection.
+*   **Robustezza:** Implementata gestione errori utente (`_showError`) e logging sicuro (`SecureLogger`) per evitare leak di PII.
 *   **Stabilità Build:** Ripristinato ambiente di CI/Test con gestione sicura dei segreti (`lib/secrets.dart`).
 *   **Qualità del Codice:** Tutti i test (Unit & Security) passano con successo.
 *   **Release Engineering:**
