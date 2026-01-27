@@ -77,14 +77,18 @@ Usa queste informazioni per riprendere la conversazione in modo naturale, dimost
     }
   }
 
-  Future<String> summarizeChat(bool isPremium, List<Map<String, dynamic>>chatHistory) async {
+  Future<String> summarizeChat(bool isPremium, List<Map<String, dynamic>> chatHistory, {GenerativeModelWrapper? modelOverride}) async {
     if (chatHistory.isEmpty) return "Nessuno storico disponibile, la chat è appnea iniziata.";
     try {
-      // Usiamo SEMPRE Flash Lite per il riassunto per massimo risparmio
-      final summarizer = GenerativeModel(
-        model: 'gemini-2.5-flash-lite',
-        apiKey: _apiKey,
-        systemInstruction: Content.system('''
+      GenerativeModelWrapper summarizer;
+      if (modelOverride != null) {
+        summarizer = modelOverride;
+      } else {
+        // Usiamo SEMPRE Flash Lite per il riassunto per massimo risparmio
+        final realModel = GenerativeModel(
+          model: 'gemini-2.5-flash-lite',
+          apiKey: _apiKey,
+          systemInstruction: Content.system('''
           RUOLO: Summarizer OrientAI. OBIETTIVO: Comprimere contesto per memoria futura.
           OUTPUT RICHIESTO:
 
@@ -104,9 +108,12 @@ Usa queste informazioni per riprendere la conversazione in modo naturale, dimost
 
           VINCOLI: Massima densità informativa. VERBATIM deve citare testualmente 3-4 scambi chiave.
         '''),
-      );
+        );
+        summarizer = RealGenerativeModel(realModel);
+      }
+
       final chatSummary = await summarizer.startChat().sendMessage(
-        Content.text(chatHistory.map((entry) => "${entry['role']}: ${entry['content']}").join("\n"))
+          Content.text(chatHistory.map((entry) => "${entry['role']}: ${entry['content']}").join("\n"))
       );
       return chatSummary.text ?? "Nessun sommario disponibile.";
     } catch (e) {
