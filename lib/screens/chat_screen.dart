@@ -213,8 +213,16 @@ class _ChatScreenState extends State<ChatScreen> {
         backgroundColor: themeColor,
         foregroundColor: Colors.white,
         actions: [
-          IconButton(onPressed: _openProfile, icon: const Icon(Icons.person)),
-          IconButton(onPressed: _logout, icon: const Icon(Icons.logout))
+          IconButton(
+            onPressed: _openProfile,
+            icon: const Icon(Icons.person),
+            tooltip: "Profilo",
+          ),
+          IconButton(
+            onPressed: _logout,
+            icon: const Icon(Icons.logout),
+            tooltip: "Esci",
+          )
         ],
       ),
       body: _isInitializing 
@@ -295,8 +303,14 @@ class _ChatScreenState extends State<ChatScreen> {
                       Expanded(
                         child: TextField(
                           controller: _controller,
+                          minLines: 1,
+                          maxLines: 4,
+                          textCapitalization: TextCapitalization.sentences,
+                          textInputAction: TextInputAction.send,
+                          maxLength: 2000,
                           decoration: InputDecoration(
                             hintText: "Scrivi un messaggio...",
+                            counterText: "",
                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(25)),
                           ),
                           onSubmitted: (_) => _isAiTyping ? null : _handleSend(),
@@ -306,6 +320,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         icon: const Icon(Icons.send),
                         onPressed: _isAiTyping ? null : _handleSend,
                         color: themeColor,
+                        tooltip: "Invia messaggio",
                       )
                     ],
                   ),
