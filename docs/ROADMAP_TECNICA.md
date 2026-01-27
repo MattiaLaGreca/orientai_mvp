@@ -6,7 +6,7 @@ Questo documento definisce il percorso tecnico per portare OrientAI al rilascio 
 *Obiettivo: Garantire che l'app non crashi e sia sicura prima di arrivare nelle mani degli utenti.*
 
 ### 1.1 Testing Infrastructure
-*   [ ] **Unit Tests:** Estendere la copertura test per `OrientAIService` (mockando le risposte di Gemini) e `DatabaseService`.
+*   [x] **Unit Tests:** Estendere la copertura test per `OrientAIService` (mockando le risposte di Gemini) e `DatabaseService`.
 *   [ ] **Widget Tests:** Testare il rendering della `ChatScreen` e la gestione degli errori (es. timeout di rete).
 *   [ ] **Integration Tests:** (Opzionale per V1) Testare il flusso completo Login -> Chat.
 
@@ -21,12 +21,12 @@ Questo documento definisce il percorso tecnico per portare OrientAI al rilascio 
 *Obiettivo: Preparare l'infrastruttura di rilascio, la conformità legale e gli asset per lo store.*
 
 ### 1.5.1 Build Configuration
-*   [ ] **Keystore Management:** Generare la chiave di upload/release (`.jks`) e configurare `key.properties`.
-*   [ ] **Version Bumping:** Gestire il versionamento semantico in `pubspec.yaml` (es. `1.0.0+1`).
-*   [ ] **Obfuscation:** Verificare configurazione ProGuard/R8 per la build release.
+*   [x] **Keystore Management:** Generare la chiave di upload/release (`.jks`) e configurare `key.properties`.
+*   [x] **Version Bumping:** Gestire il versionamento semantico in `pubspec.yaml` (es. `1.0.0+1`).
+*   [x] **Obfuscation:** Verificare configurazione ProGuard/R8 per la build release.
 
 ### 1.5.2 Legal & Compliance
-*   [ ] **Privacy Policy:** Generare e ospitare la policy (link in app e sullo store).
+*   [x] **Privacy Policy:** Generare e ospitare la policy (link in app e sullo store).
 *   [ ] **GDPR Consent:** Verifica implementazione UMP SDK per AdMob.
 
 ### 1.5.3 Store Assets
