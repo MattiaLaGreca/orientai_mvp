@@ -17,3 +17,8 @@
 **Vulnerability:** The AI System Instruction interpolated user data (`$studentName`) directly. A malicious user could inject newlines and fake instructions into their name to override the AI's persona.
 **Learning:** Even simple profile fields like "Name" are attack vectors in LLM applications if they are injected into the system prompt.
 **Prevention:** Strictly validate inputs destined for Prompt Context. Forbid control characters (newlines, tabs) in short-text fields to prevent instruction boundary hopping.
+
+## 2026-03-01 - System Instruction Injection
+**Vulnerability:** The AI System Instruction interpolated user data () directly. A malicious user could inject newlines and fake instructions into their name to override the AI's persona (Prompt Injection).
+**Learning:** Even simple profile fields like "Name" are attack vectors in LLM applications if they are injected into the system prompt structure without sanitization.
+**Prevention:** Strictly validate and sanitize inputs destined for Prompt Context. Remove control characters (newlines, tabs) to prevent instruction boundary hopping.

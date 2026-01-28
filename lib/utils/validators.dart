@@ -39,4 +39,11 @@ class Validators {
     if (value.length > 500) return "Testo troppo lungo (max 500 caratteri)";
     return null;
   }
+
+  /// 🔒 Sentinel Security: Sanitizes input for Prompt Context
+  /// Removes all control characters (including newlines and tabs) to prevent Prompt Injection via header manipulation.
+  static String sanitizeForPrompt(String input) {
+    // Remove all control characters including \n, \r, \t (0x00-0x1F and 0x7F)
+    return input.replaceAll(RegExp(r'[\x00-\x1F\x7F]'), ' ').trim();
+  }
 }

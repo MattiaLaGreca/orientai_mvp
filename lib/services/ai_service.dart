@@ -1,6 +1,7 @@
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:orientai/secrets.dart';
 import '../utils/secure_logger.dart';
+import '../utils/validators.dart';
 import '../utils/ai_wrappers.dart';
 
 class OrientAIService {
@@ -23,7 +24,7 @@ class OrientAIService {
     // Condensiamo i concetti per risparmiare token senza perdere qualità (AI-Native density).
     final String optimizedInstruction = '''
 RUOLO: OrientAI, orientatore scolastico esperto (IT).
-UTENTE: $studentName. DATA: $promptDetails.
+UTENTE: ${Validators.sanitizeForPrompt(studentName)}. DATA: ${Validators.sanitizeForPrompt(promptDetails)}.
 OBIETTIVO: Guidare scelta percorso (Teorico vs Pratico).
 METODO: Profilazione Psicologica + Consigli Pratici.
 TONO: Adattivo (Serio<->Giocoso). Empatico ma concreto.

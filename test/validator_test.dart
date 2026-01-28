@@ -74,4 +74,31 @@ void main() {
       expect(Validators.validateInterests(longText), "Testo troppo lungo (max 500 caratteri)");
     });
   });
+
+  group('Prompt Sanitization Security Tests', () {
+    test('Should replace newlines and tabs with spaces', () {
+      const input = "Line1\nLine2\tTabbed\rReturn";
+      final output = Validators.sanitizeForPrompt(input);
+      // Expect "Line1 Line2 Tabbed Return" (normalized spaces)
+      expect(output, "Line1 Line2 Tabbed Return");
+    });
+
+    test('Should remove other control characters', () {
+      const input = "Test\x00Null\x1BEscape";
+      final output = Validators.sanitizeForPrompt(input);
+      expect(output, "Test Null Escape");
+    });
+
+    test('Should preserve safe characters', () {
+      const input = "Mario Rossi, 123! @Test.";
+      final output = Validators.sanitizeForPrompt(input);
+      expect(output, input);
+    });
+
+    test('Should trim result', () {
+      const input = "  Mario  \n";
+      final output = Validators.sanitizeForPrompt(input);
+      expect(output, "Mario");
+    });
+  });
 }
