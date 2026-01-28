@@ -17,3 +17,7 @@
 ## 2026-02-27 - Chat Input Experience
 **Learning:** Default single-line text fields are frustrating for chat applications as they hide long messages horizontally.
 **Action:** Configure chat inputs with `minLines: 1`, `maxLines: 4`, and `textCapitalization: TextCapitalization.sentences` to improve visibility and typing speed.
+
+## 2026-03-05 - Chat Keyboard Dismissal
+**Learning:** Users in chat applications expect to be able to read history by scrolling without manually closing the keyboard.
+**Action:** Always set `keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag` on the chat `ListView` to allow intuitive dismissal.

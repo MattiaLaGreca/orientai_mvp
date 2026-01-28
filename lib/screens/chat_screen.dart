@@ -15,11 +15,11 @@ class ChatScreen extends StatefulWidget {
   final bool isPremium;
 
   const ChatScreen({
-    super.key, 
-    required this.studentName, 
+    super.key,
+    required this.studentName,
     required this.interests,
     required this.schoolType,
-    required this.isPremium, 
+    required this.isPremium,
   });
 
   @override
@@ -32,7 +32,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final ValueNotifier<String> _streamedResponseNotifier = ValueNotifier("");
   final OrientAIService _aiService = OrientAIService();
   final DatabaseService _dbService = DatabaseService();
-  
+
   bool _isAiTyping = true;
   bool _isInitializing = true;
   String fullResponse = "";
@@ -89,9 +89,10 @@ class _ChatScreenState extends State<ChatScreen> {
       _dbService.getSummary(),
     ]);
 
-    List<Map<String, dynamic>> chatHistory = results[0] as List<Map<String, dynamic>>;
+    List<Map<String, dynamic>> chatHistory =
+        results[0] as List<Map<String, dynamic>>;
     String previousSummary = results[1] as String;
-    
+
     if (previousSummary.isNotEmpty) {
       chatHistory.insert(0, {
         'role': 'system',
@@ -99,11 +100,13 @@ class _ChatScreenState extends State<ChatScreen> {
       });
     }
 
-    String promptDetails = "Interessi: ${widget.interests}; Frequenta: ${widget.schoolType}";
+    String promptDetails =
+        "Interessi: ${widget.interests}; Frequenta: ${widget.schoolType}";
 
     _aiService.init(widget.studentName, promptDetails, widget.isPremium);
-    
-    String summary = await _aiService.summarizeChat(widget.isPremium, chatHistory);
+
+    String summary =
+        await _aiService.summarizeChat(widget.isPremium, chatHistory);
     SecureLogger.log("ChatScreen", "Sommario Iniziale: $summary");
 
     final aiResults = await Future.wait([
@@ -113,7 +116,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     fullResponse = aiResults[0] as String;
     await _dbService.sendMessage(fullResponse, false);
-    
+
     if (mounted) {
       setState(() {
         _isInitializing = false;
@@ -154,14 +157,14 @@ class _ChatScreenState extends State<ChatScreen> {
     if (text.isEmpty) return;
 
     _controller.clear();
-    
+
     await _dbService.sendMessage(text, true);
-    
+
     _streamedResponseNotifier.value = "";
     setState(() {
       _isAiTyping = true;
     });
-    
+
     if (widget.isPremium) {
       fullResponse = await _aiService.sendMessageWithStreaming(text, (chunk) {
         if (mounted) {
@@ -169,13 +172,12 @@ class _ChatScreenState extends State<ChatScreen> {
           _scrollToBottom();
         }
       });
-    }
-    else {
+    } else {
       fullResponse = await _aiService.sendMessage(text);
     }
 
     await _dbService.sendMessage(fullResponse, false);
-    
+
     if (mounted) {
       setState(() {
         _isAiTyping = false;
@@ -203,7 +205,7 @@ class _ChatScreenState extends State<ChatScreen> {
     await _dbService.signOut();
   }
 
-   @override
+  @override
   Widget build(BuildContext context) {
     final themeColor = widget.isPremium ? Colors.black87 : Colors.indigo;
 
@@ -225,8 +227,8 @@ class _ChatScreenState extends State<ChatScreen> {
           )
         ],
       ),
-      body: _isInitializing 
-          ? const Center(child: CircularProgressIndicator()) 
+      body: _isInitializing
+          ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
                 Expanded(
@@ -243,6 +245,8 @@ class _ChatScreenState extends State<ChatScreen> {
                         controller: _scrollController,
                         reverse: true,
                         padding: const EdgeInsets.all(16),
+                        keyboardDismissBehavior:
+                            ScrollViewKeyboardDismissBehavior.onDrag,
                         itemCount: docs.length + (_isAiTyping ? 1 : 0),
                         itemBuilder: (context, index) {
                           if (_isAiTyping && index == 0) {
@@ -254,7 +258,8 @@ class _ChatScreenState extends State<ChatScreen> {
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: Colors.grey.shade300),
+                                  border:
+                                      Border.all(color: Colors.grey.shade300),
                                 ),
                                 child: ValueListenableBuilder<String>(
                                   valueListenable: _streamedResponseNotifier,
@@ -267,25 +272,38 @@ class _ChatScreenState extends State<ChatScreen> {
                           }
 
                           final dbIndex = _isAiTyping ? index - 1 : index;
-                          final data = docs[dbIndex].data() as Map<String, dynamic>;
+                          final data =
+                              docs[dbIndex].data() as Map<String, dynamic>;
                           final isUser = data['isUser'] ?? false;
 
                           return Align(
-                            alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+                            alignment: isUser
+                                ? Alignment.centerRight
+                                : Alignment.centerLeft,
                             child: Container(
                               margin: const EdgeInsets.symmetric(vertical: 4),
                               padding: const EdgeInsets.all(12),
-                              constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.85),
+                              constraints: BoxConstraints(
+                                  maxWidth:
+                                      MediaQuery.of(context).size.width * 0.85),
                               decoration: BoxDecoration(
                                 color: isUser ? themeColor : Colors.white,
                                 borderRadius: BorderRadius.circular(12),
-                                boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
+                                boxShadow: const [
+                                  BoxShadow(
+                                      color: Colors.black12, blurRadius: 4)
+                                ],
                               ),
                               child: MarkdownBody(
                                 data: data['text'] ?? '',
                                 styleSheet: MarkdownStyleSheet(
-                                  p: TextStyle(color: isUser ? Colors.white : Colors.black87),
-                                  strong: TextStyle(color: isUser ? Colors.white : themeColor, fontWeight: FontWeight.bold),
+                                  p: TextStyle(
+                                      color: isUser
+                                          ? Colors.white
+                                          : Colors.black87),
+                                  strong: TextStyle(
+                                      color: isUser ? Colors.white : themeColor,
+                                      fontWeight: FontWeight.bold),
                                 ),
                               ),
                             ),
@@ -311,9 +329,11 @@ class _ChatScreenState extends State<ChatScreen> {
                           decoration: InputDecoration(
                             hintText: "Scrivi un messaggio...",
                             counterText: "",
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(25)),
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(25)),
                           ),
-                          onSubmitted: (_) => _isAiTyping ? null : _handleSend(),
+                          onSubmitted: (_) =>
+                              _isAiTyping ? null : _handleSend(),
                         ),
                       ),
                       IconButton(
