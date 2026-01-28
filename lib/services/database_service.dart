@@ -226,7 +226,8 @@ class DatabaseService {
 
       final snapshot = await query.get();
 
-      await updateSessionStart();
+      // ⚡ Bolt Optimization: Fire-and-forget write to avoid blocking the UI read
+      updateSessionStart().ignore();
 
       return snapshot.docs.reversed.map((doc) {
         final data = doc.data() as Map<String, dynamic>;

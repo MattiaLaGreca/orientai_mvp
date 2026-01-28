@@ -1,0 +1,3 @@
+## 2026-03-20 - [Fire-and-Forget Pattern in Dart]
+**Learning:** Removing `await` from non-critical blocking calls (like stats logging or timestamp updates) significantly improves perceived latency. However, to satisfy linter rules (`unawaited_futures`), use `.ignore()` (Dart 2.15+) or `unawaited(...)` from `dart:async`. Crucially, ensure the unawaited future handles its own exceptions internally to avoid unhandled async errors.
+**Action:** When optimizing blocking chains, look for side-effects that don't influence the return value and can be safely unawaited. Always verify internal error handling of the unawaited function.
