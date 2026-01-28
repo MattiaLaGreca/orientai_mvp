@@ -67,4 +67,42 @@ void main() {
     final snapshotAfter = await messagesRef.get();
     expect(snapshotAfter.docs.length, 0, reason: "All 1200 messages should be deleted");
   });
+
+  test('getChatHistoryForAI retrieves messages and updates session start', () async {
+    final messagesRef = db.collection('users').doc(user.uid).collection('messages');
+
+    // Add some messages
+    await messagesRef.add({
+      'text': 'Hello AI',
+      'isUser': true,
+      'createdAt': DateTime.now().subtract(const Duration(minutes: 5)),
+    });
+
+    await messagesRef.add({
+      'text': 'Hello User',
+      'isUser': false,
+      'createdAt': DateTime.now().subtract(const Duration(minutes: 4)),
+    });
+
+    // Verify initial state of lastSessionStart
+    final userDocBefore = await db.collection('users').doc(user.uid).get();
+    expect(userDocBefore.data()?['lastSessionStart'], isNull);
+
+    // Call getChatHistoryForAI
+    final history = await service.getChatHistoryForAI(false);
+
+    // Verify history
+    // Query is descending (Newest first): [Hello User, Hello AI]
+    // Code reverses it: [Hello AI, Hello User]
+    expect(history.length, 2);
+    expect(history[0]['role'], 'user');
+    expect(history[0]['content'], 'Hello AI');
+    expect(history[1]['role'], 'ai');
+    expect(history[1]['content'], 'Hello User');
+
+    // Verify lastSessionStart is updated
+    // Even though it is unawaited in the service, FakeFirebaseFirestore executes immediately.
+    final userDocAfter = await db.collection('users').doc(user.uid).get();
+    expect(userDocAfter.data()?['lastSessionStart'], isNotNull);
+  });
 }
