@@ -81,7 +81,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
-          IconButton(onPressed: _logout, icon: const Icon(Icons.logout, color: Colors.white))
+          IconButton(
+            onPressed: _logout,
+            icon: const Icon(Icons.logout, color: Colors.white),
+            tooltip: "Esci",
+          )
         ],
       ),
       extendBodyBehindAppBar: true,
