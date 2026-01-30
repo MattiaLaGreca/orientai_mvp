@@ -22,3 +22,8 @@
 **Vulnerability:** The AI System Instruction interpolated user data () directly. A malicious user could inject newlines and fake instructions into their name to override the AI's persona (Prompt Injection).
 **Learning:** Even simple profile fields like "Name" are attack vectors in LLM applications if they are injected into the system prompt structure without sanitization.
 **Prevention:** Strictly validate and sanitize inputs destined for Prompt Context. Remove control characters (newlines, tabs) to prevent instruction boundary hopping.
+
+## 2026-03-02 - Prompt Injection via Chat History
+**Vulnerability:** The AI Chat Summarization feature blindly concatenated chat history (Role: Content) without sanitizing the content. A user could inject newlines to simulate "Role: ..." lines, effectively spoofing the conversation history seen by the summarizer.
+**Learning:** When feeding user-generated content back into an AI system (RAG or Summarization), relying on simple delimiters like newlines is insecure if the content itself can contain those delimiters.
+**Prevention:** Always flatten or escape structural delimiters (like newlines) in user content before interpolating it into a structured prompt.
