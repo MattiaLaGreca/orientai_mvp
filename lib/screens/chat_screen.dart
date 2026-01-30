@@ -84,44 +84,47 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _initChat() async {
-    final results = await Future.wait([
-      _dbService.getChatHistoryForAI(widget.isPremium),
-      _dbService.getSummary(),
-    ]);
+    try {
+      final results = await Future.wait([
+        _dbService.getChatHistoryForAI(widget.isPremium),
+        _dbService.getSummary(),
+      ]);
 
-    List<Map<String, dynamic>> chatHistory =
-        results[0] as List<Map<String, dynamic>>;
-    String previousSummary = results[1] as String;
+      List<Map<String, dynamic>> chatHistory =
+          results[0] as List<Map<String, dynamic>>;
+      String previousSummary = results[1] as String;
 
-    if (previousSummary.isNotEmpty) {
-      chatHistory.insert(0, {
-        'role': 'system',
-        'content': previousSummary,
-      });
-    }
+      if (previousSummary.isNotEmpty) {
+        chatHistory.insert(0, {'role': 'system', 'content': previousSummary});
+      }
 
-    String promptDetails =
-        "Interessi: ${widget.interests}; Frequenta: ${widget.schoolType}";
+      String promptDetails =
+          "Interessi: ${widget.interests}; Frequenta: ${widget.schoolType}";
 
-    _aiService.init(widget.studentName, promptDetails, widget.isPremium);
+      _aiService.init(widget.studentName, promptDetails, widget.isPremium);
 
-    String summary =
-        await _aiService.summarizeChat(widget.isPremium, chatHistory);
-    SecureLogger.log("ChatScreen", "Sommario Iniziale: $summary");
+      String summary = await _aiService.summarizeChat(
+        widget.isPremium,
+        chatHistory,
+      );
+      SecureLogger.log("ChatScreen", "Sommario Iniziale: $summary");
 
-    final aiResults = await Future.wait([
-      _aiService.sendMessage(summary),
-      _dbService.saveSummary("Sommario Chat:\n$summary"),
-    ]);
+      final aiResults = await Future.wait([
+        _aiService.sendMessage(summary),
+        _dbService.saveSummary("Sommario Chat:\n$summary"),
+      ]);
 
-    fullResponse = aiResults[0] as String;
-    await _dbService.sendMessage(fullResponse, false);
-
-    if (mounted) {
-      setState(() {
-        _isInitializing = false;
-        _isAiTyping = false;
-      });
+      fullResponse = aiResults[0] as String;
+      await _dbService.sendMessage(fullResponse, false);
+    } catch (e) {
+      SecureLogger.log("ChatScreen", "Init Error: $e");
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isInitializing = false;
+          _isAiTyping = false;
+        });
+      }
     }
   }
 
@@ -224,135 +227,135 @@ class _ChatScreenState extends State<ChatScreen> {
             onPressed: _logout,
             icon: const Icon(Icons.logout),
             tooltip: "Esci",
-          )
+          ),
         ],
       ),
-      body: _isInitializing
-          ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                Expanded(
-                  child: StreamBuilder<QuerySnapshot>(
-                    stream: _dbService.getMessagesStream(widget.isPremium),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
+      body: Column(
+        children: [
+          if (_isInitializing)
+            const LinearProgressIndicator(
+              minHeight: 2,
+              backgroundColor: Colors.transparent,
+            ),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: _dbService.getMessagesStream(widget.isPremium),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-                      final docs = snapshot.data!.docs;
+                final docs = snapshot.data!.docs;
 
-                      return ListView.builder(
-                        controller: _scrollController,
-                        reverse: true,
-                        padding: const EdgeInsets.all(16),
-                        keyboardDismissBehavior:
-                            ScrollViewKeyboardDismissBehavior.onDrag,
-                        itemCount: docs.length + (_isAiTyping ? 1 : 0),
-                        itemBuilder: (context, index) {
-                          if (_isAiTyping && index == 0) {
-                            return Align(
-                              alignment: Alignment.centerLeft,
-                              child: Container(
-                                margin: const EdgeInsets.symmetric(vertical: 4),
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border:
-                                      Border.all(color: Colors.grey.shade300),
-                                ),
-                                child: ValueListenableBuilder<String>(
-                                  valueListenable: _streamedResponseNotifier,
-                                  builder: (context, value, child) {
-                                    return MarkdownBody(data: "$value ▋");
-                                  },
-                                ),
-                              ),
-                            );
-                          }
-
-                          final dbIndex = _isAiTyping ? index - 1 : index;
-                          final data =
-                              docs[dbIndex].data() as Map<String, dynamic>;
-                          final isUser = data['isUser'] ?? false;
-
-                          return Align(
-                            alignment: isUser
-                                ? Alignment.centerRight
-                                : Alignment.centerLeft,
-                            child: Container(
-                              margin: const EdgeInsets.symmetric(vertical: 4),
-                              padding: const EdgeInsets.all(12),
-                              constraints: BoxConstraints(
-                                  maxWidth:
-                                      MediaQuery.of(context).size.width * 0.85),
-                              decoration: BoxDecoration(
-                                color: isUser ? themeColor : Colors.white,
-                                borderRadius: BorderRadius.circular(12),
-                                boxShadow: const [
-                                  BoxShadow(
-                                      color: Colors.black12, blurRadius: 4)
-                                ],
-                              ),
-                              child: MarkdownBody(
-                                data: data['text'] ?? '',
-                                styleSheet: MarkdownStyleSheet(
-                                  p: TextStyle(
-                                      color: isUser
-                                          ? Colors.white
-                                          : Colors.black87),
-                                  strong: TextStyle(
-                                      color: isUser ? Colors.white : themeColor,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  color: Colors.white,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _controller,
-                          minLines: 1,
-                          maxLines: 4,
-                          textCapitalization: TextCapitalization.sentences,
-                          textInputAction: TextInputAction.send,
-                          maxLength: 2000,
-                          decoration: InputDecoration(
-                            hintText: "Scrivi un messaggio...",
-                            counterText: "",
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(25)),
+                return ListView.builder(
+                  controller: _scrollController,
+                  reverse: true,
+                  padding: const EdgeInsets.all(16),
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  itemCount: docs.length + (_isAiTyping ? 1 : 0),
+                  itemBuilder: (context, index) {
+                    if (_isAiTyping && index == 0) {
+                      return Align(
+                        alignment: Alignment.centerLeft,
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(vertical: 4),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.grey.shade300),
                           ),
-                          onSubmitted: (_) =>
-                              _isAiTyping ? null : _handleSend(),
+                          child: ValueListenableBuilder<String>(
+                            valueListenable: _streamedResponseNotifier,
+                            builder: (context, value, child) {
+                              return MarkdownBody(data: "$value ▋");
+                            },
+                          ),
+                        ),
+                      );
+                    }
+
+                    final dbIndex = _isAiTyping ? index - 1 : index;
+                    final data = docs[dbIndex].data() as Map<String, dynamic>;
+                    final isUser = data['isUser'] ?? false;
+
+                    return Align(
+                      alignment: isUser
+                          ? Alignment.centerRight
+                          : Alignment.centerLeft,
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(vertical: 4),
+                        padding: const EdgeInsets.all(12),
+                        constraints: BoxConstraints(
+                          maxWidth: MediaQuery.of(context).size.width * 0.85,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isUser ? themeColor : Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: const [
+                            BoxShadow(color: Colors.black12, blurRadius: 4),
+                          ],
+                        ),
+                        child: MarkdownBody(
+                          data: data['text'] ?? '',
+                          styleSheet: MarkdownStyleSheet(
+                            p: TextStyle(
+                              color: isUser ? Colors.white : Colors.black87,
+                            ),
+                            strong: TextStyle(
+                              color: isUser ? Colors.white : themeColor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.send),
-                        onPressed: _isAiTyping ? null : _handleSend,
-                        color: themeColor,
-                        tooltip: "Invia messaggio",
-                      )
-                    ],
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(8),
+            color: Colors.white,
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    minLines: 1,
+                    maxLines: 4,
+                    textCapitalization: TextCapitalization.sentences,
+                    textInputAction: TextInputAction.send,
+                    maxLength: 2000,
+                    decoration: InputDecoration(
+                      hintText: "Scrivi un messaggio...",
+                      counterText: "",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                    ),
+                    onSubmitted: (_) => _isAiTyping ? null : _handleSend(),
                   ),
                 ),
-                if (_isBannerAdReady && _bannerAd != null)
-                  SizedBox(
-                    width: _bannerAd!.size.width.toDouble(),
-                    height: _bannerAd!.size.height.toDouble(),
-                    child: AdWidget(ad: _bannerAd!),
-                  ),
+                IconButton(
+                  icon: const Icon(Icons.send),
+                  onPressed: _isAiTyping ? null : _handleSend,
+                  color: themeColor,
+                  tooltip: "Invia messaggio",
+                ),
               ],
             ),
+          ),
+          if (_isBannerAdReady && _bannerAd != null)
+            SizedBox(
+              width: _bannerAd!.size.width.toDouble(),
+              height: _bannerAd!.size.height.toDouble(),
+              child: AdWidget(ad: _bannerAd!),
+            ),
+        ],
+      ),
     );
   }
 }
