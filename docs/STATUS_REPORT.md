@@ -1,6 +1,6 @@
 # Status Report - OrientAI
 
-**Data:** Gennaio 2026
+**Data:** Marzo 2026
 **Versione:** 1.0.0+1
 **Fase:** Pre-Launch (MVP Ready)
 
@@ -10,7 +10,11 @@ Il progetto è tecnicamente pronto per la generazione della build di rilascio (R
 
 ## ✅ Completati Recentemente
 *   **Refactoring Core:** Migliorata la testabilità dei servizi (`OrientAIService`, `DatabaseService`) con Dependency Injection.
-*   **Robustezza:** Implementata gestione errori utente (`_showError`) e logging sicuro (`SecureLogger`) per evitare leak di PII.
+*   **Robustezza & UX:**
+    *   Implementata gestione errori utente (`_showError`) e logging sicuro (`SecureLogger`).
+    *   Migliorata input UX (Tasto "Cancella testo", Capitalizzazione frasi, chiusura tastiera su scroll).
+*   **Sicurezza:** Implementata sanitizzazione input (rimozione caratteri di controllo) e protezione da Prompt Injection (strip newlines).
+*   **Performance:** Ottimizzate query Firestore (limite 10 messaggi) e cancellazione sicura (batch limit 500).
 *   **Stabilità Build:** Ripristinato ambiente di CI/Test con gestione sicura dei segreti (`lib/secrets.dart`).
 *   **Qualità del Codice:** Tutti i test (Unit & Security) passano con successo.
 *   **Release Engineering:**
