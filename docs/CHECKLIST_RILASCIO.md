@@ -18,13 +18,13 @@ Questa checklist guida il processo di pubblicazione della prima versione (V1.0) 
 ## ⚙️ 3. Configurazione Tecnica di Build
 *   [ ] **Keystore:** Generare il file `.jks` per la firma dell'APK/AAB. **NON committare questo file su git.**
 *   [ ] **`key.properties`:** Configurare il file per referenziare la keystore, ed escluderlo dal version control.
-*   [ ] **Version Bumping:** Aggiornare `pubspec.yaml` (es. `version: 1.0.0+1`).
-*   [ ] **App ID:** Verificare che `com.orientai.app` sia univoco e registrato in Firebase Console.
-*   [ ] **Obfuscation:** Abilitare R8/ProGuard in `android/app/build.gradle` (`minifyEnabled true` per release).
+*   [x] **Version Bumping:** Aggiornare `pubspec.yaml` (es. `version: 1.0.0+1`).
+*   [x] **App ID:** Verificare che `com.orientai.app` sia univoco e registrato in Firebase Console.
+*   [x] **Obfuscation:** Abilitare R8/ProGuard in `android/app/build.gradle` (`minifyEnabled true` per release).
 
 ## 💰 4. Monetizzazione (AdMob)
 *   [ ] **app-ads.txt:** Creare e hostare il file `app-ads.txt` sul dominio dello sviluppatore (o sito web app). È essenziale per proteggere le entrate.
-*   [ ] **Ad Units Reali:** Sostituire le unità pubblicitarie di test (utilizzate in `main.dart`) con quelle reali create su AdMob Console.
+*   [ ] **Ad Units Reali:** Sostituire le unità pubblicitarie di test (utilizzate in `lib/screens/chat_screen.dart`) con quelle reali create su AdMob Console.
 *   [ ] **Payment Profile:** Completare il profilo pagamenti su Google Play Console e AdMob.
 *   [ ] **Reduced Fee Tier (15%):**
     *   Google Play Console: Iscriversi al "15% service fee tier" (Developer Profile -> Associated Developer Accounts).

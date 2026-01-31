@@ -1,18 +1,19 @@
 # Status Report - OrientAI
 
-**Data:** Gennaio 2026
+**Data:** Fine Gennaio 2026
 **Versione:** 1.0.0+1
-**Fase:** Pre-Launch (MVP Ready)
+**Fase:** Pre-Launch (Release Candidate 1)
 
 ## 🚦 Stato Generale: VERDE
 
-Il progetto è tecnicamente pronto per la generazione della build di rilascio (Release Candidate). Le funzionalità core sono stabili e testate.
+Il progetto è in stato di **Release Candidate 1 (RC1)**. Le funzionalità core sono congelate, testate e pronte per la build di produzione.
 
 ## ✅ Completati Recentemente
+*   **Security & Sanitization:** Aggiunti test di sicurezza specifici per Prompt Injection e suite di test per la validazione dell'input (`Validators`).
 *   **Refactoring Core:** Migliorata la testabilità dei servizi (`OrientAIService`, `DatabaseService`) con Dependency Injection.
 *   **Robustezza:** Implementata gestione errori utente (`_showError`) e logging sicuro (`SecureLogger`) per evitare leak di PII.
 *   **Stabilità Build:** Ripristinato ambiente di CI/Test con gestione sicura dei segreti (`lib/secrets.dart`).
-*   **Qualità del Codice:** Tutti i test (Unit & Security) passano con successo.
+*   **Qualità del Codice:** Tutti i test (Unit, Security, Input) passano con successo.
 *   **Release Engineering:**
     *   Configurato `android/app/build.gradle.kts` per supportare Offuscamento (R8) e Resource Shrinking.
     *   Predisposta configurazione di firma (`signingConfigs`) tramite `key.properties`.
@@ -22,8 +23,9 @@ Il progetto è tecnicamente pronto per la generazione della build di rilascio (R
 ## 🚧 Bloccanti / Da Fare (Manuale)
 Questi passaggi richiedono intervento manuale dello sviluppatore (non automatizzabile dall'AI per motivi di sicurezza/accesso):
 1.  **Keystore:** Generare il file `.jks` e popolare `key.properties` (vedi `docs/CHECKLIST_RILASCIO.md`).
-2.  **AdMob:** Creare le unità pubblicitarie reali su AdMob Console e sostituire gli ID in `lib/services/ad_service.dart` (o dove definiti).
+2.  **AdMob:** Creare le unità pubblicitarie reali su AdMob Console e sostituire gli ID in `lib/screens/chat_screen.dart`.
 3.  **Store Assets:** Caricare icona e screenshot sulla Google Play Console.
+4.  **Privacy Policy Hosting:** Assicurarsi che la pagina `https://orientai.app/privacy` sia raggiungibile.
 
 ## 📈 Prossimi Passaggi (Roadmap)
 Una volta pubblicato l'MVP:
