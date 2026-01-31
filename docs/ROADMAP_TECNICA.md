@@ -21,12 +21,12 @@ Questo documento definisce il percorso tecnico per portare OrientAI al rilascio 
 *Obiettivo: Preparare l'infrastruttura di rilascio, la conformità legale e gli asset per lo store.*
 
 ### 1.5.1 Build Configuration
-*   [x] **Keystore Management:** Generare la chiave di upload/release (`.jks`) e configurare `key.properties`.
+*   [ ] **Keystore Management:** Generare la chiave di upload/release (`.jks`) e configurare `key.properties`.
 *   [x] **Version Bumping:** Gestire il versionamento semantico in `pubspec.yaml` (es. `1.0.0+1`).
 *   [x] **Obfuscation:** Verificare configurazione ProGuard/R8 per la build release.
 
 ### 1.5.2 Legal & Compliance
-*   [x] **Privacy Policy:** Generare e ospitare la policy (link in app e sullo store).
+*   [ ] **Privacy Policy:** Generare e ospitare la policy (link in app e sullo store).
 *   [ ] **GDPR Consent:** Verifica implementazione UMP SDK per AdMob.
 
 ### 1.5.3 Store Assets
