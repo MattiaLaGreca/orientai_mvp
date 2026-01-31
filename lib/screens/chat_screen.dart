@@ -37,6 +37,8 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _isInitializing = true;
   String fullResponse = "";
 
+  late Stream<QuerySnapshot> _messagesStream;
+
   // Ads
   BannerAd? _bannerAd;
   bool _isBannerAdReady = false;
@@ -44,11 +46,21 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
+    // ⚡ Bolt Optimization: Initialize stream once to avoid recreation on rebuilds
+    _messagesStream = _dbService.getMessagesStream(widget.isPremium);
     _initChat();
 
     // Inizializza Ads solo se non è premium
     if (!widget.isPremium) {
       _loadBannerAd();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant ChatScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isPremium != widget.isPremium) {
+      _messagesStream = _dbService.getMessagesStream(widget.isPremium);
     }
   }
 
@@ -233,7 +245,7 @@ class _ChatScreenState extends State<ChatScreen> {
               children: [
                 Expanded(
                   child: StreamBuilder<QuerySnapshot>(
-                    stream: _dbService.getMessagesStream(widget.isPremium),
+                    stream: _messagesStream,
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
