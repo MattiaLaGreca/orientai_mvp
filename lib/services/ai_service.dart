@@ -114,7 +114,7 @@ Usa queste informazioni per riprendere la conversazione in modo naturale, dimost
       }
 
       final chatSummary = await summarizer.startChat().sendMessage(
-          Content.text(chatHistory.map((entry) => "${entry['role']}: ${entry['content']}").join("\n"))
+          Content.text(chatHistory.map((entry) => "${entry['role']}: ${Validators.sanitizeForPrompt(entry['content'] ?? '')}").join("\n"))
       );
       return chatSummary.text ?? "Nessun sommario disponibile.";
     } catch (e) {
