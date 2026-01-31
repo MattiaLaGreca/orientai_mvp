@@ -316,33 +316,52 @@ class _ChatScreenState extends State<ChatScreen> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   color: Colors.white,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _controller,
-                          minLines: 1,
-                          maxLines: 4,
-                          textCapitalization: TextCapitalization.sentences,
-                          textInputAction: TextInputAction.send,
-                          maxLength: 2000,
-                          decoration: InputDecoration(
-                            hintText: "Scrivi un messaggio...",
-                            counterText: "",
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(25)),
+                  child: ValueListenableBuilder<TextEditingValue>(
+                    valueListenable: _controller,
+                    builder: (context, value, child) {
+                      final hasText = value.text.trim().isNotEmpty;
+                      return Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _controller,
+                              minLines: 1,
+                              maxLines: 4,
+                              textCapitalization: TextCapitalization.sentences,
+                              textInputAction: TextInputAction.send,
+                              maxLength: 2000,
+                              decoration: InputDecoration(
+                                hintText: "Scrivi un messaggio...",
+                                counterText: "",
+                                border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(25)),
+                                suffixIcon: hasText
+                                    ? IconButton(
+                                        icon: const Icon(Icons.clear,
+                                            color: Colors.grey),
+                                        tooltip: "Cancella testo",
+                                        onPressed: () {
+                                          _controller.clear();
+                                        },
+                                      )
+                                    : null,
+                              ),
+                              onSubmitted: (_) =>
+                                  (_isAiTyping || !hasText) ? null : _handleSend(),
+                            ),
                           ),
-                          onSubmitted: (_) =>
-                              _isAiTyping ? null : _handleSend(),
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.send),
-                        onPressed: _isAiTyping ? null : _handleSend,
-                        color: themeColor,
-                        tooltip: "Invia messaggio",
-                      )
-                    ],
+                          IconButton(
+                            icon: const Icon(Icons.send),
+                            onPressed:
+                                (_isAiTyping || !hasText) ? null : _handleSend,
+                            color: (_isAiTyping || !hasText)
+                                ? Colors.grey
+                                : themeColor,
+                            tooltip: "Invia messaggio",
+                          )
+                        ],
+                      );
+                    },
                   ),
                 ),
                 if (_isBannerAdReady && _bannerAd != null)
