@@ -3,7 +3,7 @@
 Questo documento serve come punto di ingresso per la documentazione di OrientAI. Definisce la missione, l'architettura tecnica e rimanda ai documenti operativi specifici.
 
 ## 📊 Status Progetto
-**Fase Attuale:** Pre-Release (Release Engineering)
+**Fase Attuale:** Release Candidate 1
 *   Il focus attuale è sulla preparazione del primo rilascio pubblico (V1.0) per Android.
 *   Priorità: Configurazione Build, Firma Digitale, Conformità Legale, Assets Store.
 

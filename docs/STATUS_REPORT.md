@@ -2,7 +2,7 @@
 
 **Data:** Gennaio 2026
 **Versione:** 1.0.0+1
-**Fase:** Pre-Launch (MVP Ready)
+**Fase:** Release Candidate 1
 
 ## 🚦 Stato Generale: VERDE
 
@@ -13,6 +13,9 @@ Il progetto è tecnicamente pronto per la generazione della build di rilascio (R
 *   **Robustezza:** Implementata gestione errori utente (`_showError`) e logging sicuro (`SecureLogger`) per evitare leak di PII.
 *   **Stabilità Build:** Ripristinato ambiente di CI/Test con gestione sicura dei segreti (`lib/secrets.dart`).
 *   **Qualità del Codice:** Tutti i test (Unit & Security) passano con successo.
+*   **Sicurezza:**
+    *   **Input Sanitization:** Implementata validazione input e pulizia caratteri invisibili (`Validators`).
+    *   **Prompt Injection:** Completati test di sicurezza contro injection attacks.
 *   **Release Engineering:**
     *   Configurato `android/app/build.gradle.kts` per supportare Offuscamento (R8) e Resource Shrinking.
     *   Predisposta configurazione di firma (`signingConfigs`) tramite `key.properties`.

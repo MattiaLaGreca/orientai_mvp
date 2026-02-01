@@ -14,6 +14,7 @@ Questo documento definisce il percorso tecnico per portare OrientAI al rilascio 
 *   [x] **API Key Isolation:** Segregazione delle chiavi API in `lib/secrets.dart` (non committato).
 *   [x] **User-Facing Error Messages:** Implementata gestione errori (`OrientAIException`) con messaggi user-friendly.
 *   [x] **Privacy Logs:** Implementato `SecureLogger` per sanitizzare i log in produzione.
+*   [x] **Input Sanitization:** Validazione input e pulizia caratteri invisibili.
 
 ---
 
