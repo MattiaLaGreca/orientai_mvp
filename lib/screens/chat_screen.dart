@@ -94,10 +94,7 @@ class _ChatScreenState extends State<ChatScreen> {
     String previousSummary = results[1] as String;
 
     if (previousSummary.isNotEmpty) {
-      chatHistory.insert(0, {
-        'role': 'system',
-        'content': previousSummary,
-      });
+      chatHistory.insert(0, {'role': 'system', 'content': previousSummary});
     }
 
     String promptDetails =
@@ -105,8 +102,10 @@ class _ChatScreenState extends State<ChatScreen> {
 
     _aiService.init(widget.studentName, promptDetails, widget.isPremium);
 
-    String summary =
-        await _aiService.summarizeChat(widget.isPremium, chatHistory);
+    String summary = await _aiService.summarizeChat(
+      widget.isPremium,
+      chatHistory,
+    );
     SecureLogger.log("ChatScreen", "Sommario Iniziale: $summary");
 
     final aiResults = await Future.wait([
@@ -224,7 +223,7 @@ class _ChatScreenState extends State<ChatScreen> {
             onPressed: _logout,
             icon: const Icon(Icons.logout),
             tooltip: "Esci",
-          )
+          ),
         ],
       ),
       body: _isInitializing
@@ -258,8 +257,9 @@ class _ChatScreenState extends State<ChatScreen> {
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(12),
-                                  border:
-                                      Border.all(color: Colors.grey.shade300),
+                                  border: Border.all(
+                                    color: Colors.grey.shade300,
+                                  ),
                                 ),
                                 child: ValueListenableBuilder<String>(
                                   valueListenable: _streamedResponseNotifier,
@@ -284,26 +284,30 @@ class _ChatScreenState extends State<ChatScreen> {
                               margin: const EdgeInsets.symmetric(vertical: 4),
                               padding: const EdgeInsets.all(12),
                               constraints: BoxConstraints(
-                                  maxWidth:
-                                      MediaQuery.of(context).size.width * 0.85),
+                                maxWidth:
+                                    MediaQuery.of(context).size.width * 0.85,
+                              ),
                               decoration: BoxDecoration(
                                 color: isUser ? themeColor : Colors.white,
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: const [
                                   BoxShadow(
-                                      color: Colors.black12, blurRadius: 4)
+                                    color: Colors.black12,
+                                    blurRadius: 4,
+                                  ),
                                 ],
                               ),
                               child: MarkdownBody(
                                 data: data['text'] ?? '',
                                 styleSheet: MarkdownStyleSheet(
                                   p: TextStyle(
-                                      color: isUser
-                                          ? Colors.white
-                                          : Colors.black87),
+                                    color:
+                                        isUser ? Colors.white : Colors.black87,
+                                  ),
                                   strong: TextStyle(
-                                      color: isUser ? Colors.white : themeColor,
-                                      fontWeight: FontWeight.bold),
+                                    color: isUser ? Colors.white : themeColor,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                             ),
@@ -316,33 +320,52 @@ class _ChatScreenState extends State<ChatScreen> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   color: Colors.white,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _controller,
-                          minLines: 1,
-                          maxLines: 4,
-                          textCapitalization: TextCapitalization.sentences,
-                          textInputAction: TextInputAction.send,
-                          maxLength: 2000,
-                          decoration: InputDecoration(
-                            hintText: "Scrivi un messaggio...",
-                            counterText: "",
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(25)),
+                  child: ValueListenableBuilder<TextEditingValue>(
+                    valueListenable: _controller,
+                    builder: (context, value, child) {
+                      final isTextEmpty = value.text.trim().isEmpty;
+                      return Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _controller,
+                              minLines: 1,
+                              maxLines: 4,
+                              textCapitalization: TextCapitalization.sentences,
+                              textInputAction: TextInputAction.send,
+                              maxLength: 2000,
+                              decoration: InputDecoration(
+                                hintText: "Scrivi un messaggio...",
+                                counterText: "",
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                                suffixIcon: isTextEmpty
+                                    ? null
+                                    : IconButton(
+                                        icon: const Icon(Icons.clear),
+                                        onPressed: () => _controller.clear(),
+                                        tooltip: "Cancella testo",
+                                      ),
+                              ),
+                              onSubmitted: (_) => (_isAiTyping || isTextEmpty)
+                                  ? null
+                                  : _handleSend(),
+                            ),
                           ),
-                          onSubmitted: (_) =>
-                              _isAiTyping ? null : _handleSend(),
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.send),
-                        onPressed: _isAiTyping ? null : _handleSend,
-                        color: themeColor,
-                        tooltip: "Invia messaggio",
-                      )
-                    ],
+                          IconButton(
+                            icon: const Icon(Icons.send),
+                            onPressed: (_isAiTyping || isTextEmpty)
+                                ? null
+                                : _handleSend,
+                            color: (_isAiTyping || isTextEmpty)
+                                ? Colors.grey
+                                : themeColor,
+                            tooltip: "Invia messaggio",
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ),
                 if (_isBannerAdReady && _bannerAd != null)
