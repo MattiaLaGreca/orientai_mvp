@@ -113,8 +113,9 @@ Usa queste informazioni per riprendere la conversazione in modo naturale, dimost
         summarizer = RealGenerativeModel(realModel);
       }
 
+      // 🔒 Sentinel Security: Sanitize content to prevent Newline Injection in prompt
       final chatSummary = await summarizer.startChat().sendMessage(
-          Content.text(chatHistory.map((entry) => "${entry['role']}: ${entry['content']}").join("\n"))
+          Content.text(chatHistory.map((entry) => "${entry['role']}: ${entry['content'].toString().replaceAll('\n', ' ')}").join("\n"))
       );
       return chatSummary.text ?? "Nessun sommario disponibile.";
     } catch (e) {
