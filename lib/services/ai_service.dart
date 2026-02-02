@@ -113,9 +113,12 @@ Usa queste informazioni per riprendere la conversazione in modo naturale, dimost
         summarizer = RealGenerativeModel(realModel);
       }
 
-      final chatSummary = await summarizer.startChat().sendMessage(
-          Content.text(chatHistory.map((entry) => "${entry['role']}: ${entry['content']}").join("\n"))
-      );
+      final chatSummary = await summarizer.startChat().sendMessage(Content.text(chatHistory.map((entry) {
+        // 🔒 Sentinel Security: Sanitize input to prevent Prompt Injection via chat history
+        // Replace newlines with spaces to ensure user content cannot mimic message delimiters.
+        final sanitizedContent = (entry['content'] as String).replaceAll('\n', ' ').replaceAll('\r', ' ');
+        return "${entry['role']}: $sanitizedContent";
+      }).join("\n")));
       return chatSummary.text ?? "Nessun sommario disponibile.";
     } catch (e) {
       SecureLogger.log("AI summarizeChat Error", e);
