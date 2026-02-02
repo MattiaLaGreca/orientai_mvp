@@ -33,6 +33,9 @@ class _ChatScreenState extends State<ChatScreen> {
   final OrientAIService _aiService = OrientAIService();
   final DatabaseService _dbService = DatabaseService();
 
+  late Stream<QuerySnapshot> _messagesStream;
+  bool _showClearButton = false;
+
   bool _isAiTyping = true;
   bool _isInitializing = true;
   String fullResponse = "";
@@ -44,6 +47,8 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
+    _messagesStream = _dbService.getMessagesStream(widget.isPremium);
+    _controller.addListener(_onTextChanged);
     _initChat();
 
     // Inizializza Ads solo se non è premium
@@ -76,11 +81,21 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
+    _controller.removeListener(_onTextChanged);
     _controller.dispose();
     _scrollController.dispose();
     _streamedResponseNotifier.dispose();
     _bannerAd?.dispose();
     super.dispose();
+  }
+
+  void _onTextChanged() {
+    final shouldShow = _controller.text.isNotEmpty;
+    if (_showClearButton != shouldShow) {
+      setState(() {
+        _showClearButton = shouldShow;
+      });
+    }
   }
 
   Future<void> _initChat() async {

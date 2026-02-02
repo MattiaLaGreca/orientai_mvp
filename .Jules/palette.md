@@ -21,3 +21,11 @@
 ## 2026-03-05 - Chat Keyboard Dismissal
 **Learning:** Users in chat applications expect to be able to read history by scrolling without manually closing the keyboard.
 **Action:** Always set `keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag` on the chat `ListView` to allow intuitive dismissal.
+
+## 2026-03-10 - Chat Input Controls
+**Learning:** Users typing long prompts in chat interfaces need a quick way to clear text without holding backspace.
+**Action:** Add a clear (X) button suffix to the chat input field that appears only when text is present.
+
+## 2026-03-10 - Stream Performance in Inputs
+**Learning:** Initializing streams inside `build` causes unnecessary restarts when keyboard state (setState) changes, causing UI jank.
+**Action:** Always initialize `Stream` objects in `initState` to ensure input interactions (typing/clearing) remain 60fps smooth.
