@@ -21,3 +21,7 @@
 ## 2026-03-05 - Chat Keyboard Dismissal
 **Learning:** Users in chat applications expect to be able to read history by scrolling without manually closing the keyboard.
 **Action:** Always set `keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag` on the chat `ListView` to allow intuitive dismissal.
+
+## 2026-03-06 - Action Availability Feedback
+**Learning:** Users expect primary actions (like Send) to be visually disabled when the input is invalid (empty), preventing frustration/confusion.
+**Action:** Use `ValueListenableBuilder` to reactively disable action buttons based on input state, providing immediate visual feedback.

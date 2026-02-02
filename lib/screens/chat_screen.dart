@@ -332,15 +332,25 @@ class _ChatScreenState extends State<ChatScreen> {
                             border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(25)),
                           ),
-                          onSubmitted: (_) =>
-                              _isAiTyping ? null : _handleSend(),
+                          onSubmitted: (val) =>
+                              (_isAiTyping || val.trim().isEmpty)
+                                  ? null
+                                  : _handleSend(),
                         ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.send),
-                        onPressed: _isAiTyping ? null : _handleSend,
-                        color: themeColor,
-                        tooltip: "Invia messaggio",
+                      ValueListenableBuilder<TextEditingValue>(
+                        valueListenable: _controller,
+                        builder: (context, value, child) {
+                          final isTextEmpty = value.text.trim().isEmpty;
+                          return IconButton(
+                            icon: const Icon(Icons.send),
+                            onPressed: (_isAiTyping || isTextEmpty)
+                                ? null
+                                : _handleSend,
+                            color: themeColor,
+                            tooltip: "Invia messaggio",
+                          );
+                        },
                       )
                     ],
                   ),
