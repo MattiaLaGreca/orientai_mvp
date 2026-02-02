@@ -89,32 +89,49 @@ class _ChatScreenState extends State<ChatScreen> {
     super.dispose();
   }
 
-  void _onTextChanged() {
-    final shouldShow = _controller.text.isNotEmpty;
-    if (_showClearButton != shouldShow) {
-      setState(() {
-        _showClearButton = shouldShow;
-      });
-    }
-  }
-
   Future<void> _initChat() async {
-    try {
-      final results = await Future.wait([
-        _dbService.getChatHistoryForAI(widget.isPremium),
-        _dbService.getSummary(),
-      ]);
+    final results = await Future.wait([
+      _dbService.getChatHistoryForAI(widget.isPremium),
+      _dbService.getSummary(),
+    ]);
 
-      List<Map<String, dynamic>> chatHistory =
-          results[0] as List<Map<String, dynamic>>;
-      String previousSummary = results[1] as String;
+    List<Map<String, dynamic>> newMessages =
+        results[0] as List<Map<String, dynamic>>;
+    String previousSummary = results[1] as String;
 
+    String promptDetails =
+        "Interessi: ${widget.interests}; Frequenta: ${widget.schoolType}";
+
+    _aiService.init(widget.studentName, promptDetails, widget.isPremium);
+
+    String summary;
+    bool shouldSaveSummary = true;
+
+    // ⚡ Bolt Optimization: Skip redundant summarization if no new messages
+    if (newMessages.isEmpty && previousSummary.isNotEmpty) {
+      // Strip prefix to reuse content
+      summary = previousSummary.replaceFirst("Sommario Chat:\n", "");
+      shouldSaveSummary = false;
+      SecureLogger.log(
+          "ChatScreen", "Optimized: Skipped summarization (No new messages)");
+    } else {
+      List<Map<String, dynamic>> chatHistory = newMessages;
       if (previousSummary.isNotEmpty) {
-        chatHistory.insert(0, {'role': 'system', 'content': previousSummary});
+        chatHistory.insert(0, {
+          'role': 'system',
+          'content': previousSummary,
+        });
       }
+      summary = await _aiService.summarizeChat(widget.isPremium, chatHistory);
+      SecureLogger.log("ChatScreen", "Sommario Iniziale: $summary");
+    }
 
-      String promptDetails =
-          "Interessi: ${widget.interests}; Frequenta: ${widget.schoolType}";
+    final aiResults = await Future.wait([
+      _aiService.sendMessage(summary),
+      shouldSaveSummary
+          ? _dbService.saveSummary("Sommario Chat:\n$summary")
+          : Future.value(),
+    ]);
 
       _aiService.init(widget.studentName, promptDetails, widget.isPremium);
 
