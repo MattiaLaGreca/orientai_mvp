@@ -5,3 +5,6 @@
 ## 2026-03-20 - [Optimizing Redundant AI Calls]
 **Learning:** In conversational AI apps, "summarization" on initialization is expensive (latency + tokens). If the user hasn't sent new messages since the last session, the previous summary is still valid. Detecting this state (empty new messages list) allows skipping the API call entirely.
 **Action:** Always check if the "delta" of new data is empty before triggering expensive re-processing or AI summarization steps. Reuse cached/stored results whenever possible.
+## 2026-03-24 - [Regex Compilation in Hot Paths]
+**Learning:** Input validation methods (sanitization/security) are called frequently. Inline `RegExp` instantiation causes unnecessary recompilation overhead.
+**Action:** Always extract `RegExp` to `static final` constants in utility classes like `Validators`.
