@@ -227,12 +227,14 @@ class _ChatScreenState extends State<ChatScreen> {
           )
         ],
       ),
-      body: _isInitializing
-          ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                Expanded(
-                  child: StreamBuilder<QuerySnapshot>(
+      body: Column(
+        children: [
+          // ⚡ Bolt Optimization: Non-blocking UI.
+          // Render chat history immediately while AI initializes in background.
+          // _isInitializing only controls the progress bar and input lock.
+          if (_isInitializing) const LinearProgressIndicator(),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
                     stream: _dbService.getMessagesStream(widget.isPremium),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
