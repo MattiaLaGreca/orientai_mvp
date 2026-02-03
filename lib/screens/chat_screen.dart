@@ -131,8 +131,8 @@ class _ChatScreenState extends State<ChatScreen> {
           : Future.value(),
     ]);
 
-    fullResponse = aiResults[0] as String;
-    await _dbService.sendMessage(fullResponse, false);
+      fullResponse = aiResults[0] as String;
+      await _dbService.sendMessage(fullResponse, false);
     } catch (e) {
       SecureLogger.log("ChatScreen", "Init Error: $e");
     } finally {
@@ -143,6 +143,12 @@ class _ChatScreenState extends State<ChatScreen> {
         });
       }
     }
+  }
+
+  void _onTextChanged() {
+    setState(() {
+      _showClearButton = _controller.text.isNotEmpty;
+    });
   }
 
   void _scrollToBottom() {
@@ -355,6 +361,15 @@ class _ChatScreenState extends State<ChatScreen> {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(25),
                       ),
+                      suffixIcon: _showClearButton
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                _controller.clear();
+                              },
+                              tooltip: "Cancella testo",
+                            )
+                          : null,
                     ),
                     onSubmitted: (_) => _isAiTyping ? null : _handleSend(),
                   ),
