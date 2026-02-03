@@ -89,9 +89,9 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _initChat() async {
     try {
       final results = await Future.wait([
-      _dbService.getChatHistoryForAI(widget.isPremium),
-      _dbService.getSummary(),
-    ]);
+        _dbService.getChatHistoryForAI(widget.isPremium),
+        _dbService.getSummary(),
+      ]);
 
     List<Map<String, dynamic>> newMessages =
         results[0] as List<Map<String, dynamic>>;
@@ -131,8 +131,8 @@ class _ChatScreenState extends State<ChatScreen> {
           : Future.value(),
     ]);
 
-      fullResponse = aiResults[0] as String;
-      await _dbService.sendMessage(fullResponse, false);
+    fullResponse = aiResults[0] as String;
+    await _dbService.sendMessage(fullResponse, false);
     } catch (e) {
       SecureLogger.log("ChatScreen", "Init Error: $e");
     } finally {
