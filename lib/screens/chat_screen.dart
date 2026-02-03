@@ -48,7 +48,6 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     _messagesStream = _dbService.getMessagesStream(widget.isPremium);
-    _controller.addListener(_onTextChanged);
     _initChat();
 
     // Inizializza Ads solo se non è premium
@@ -81,7 +80,6 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
-    _controller.removeListener(_onTextChanged);
     _controller.dispose();
     _scrollController.dispose();
     _streamedResponseNotifier.dispose();
@@ -90,10 +88,11 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _initChat() async {
-    final results = await Future.wait([
-      _dbService.getChatHistoryForAI(widget.isPremium),
-      _dbService.getSummary(),
-    ]);
+    try {
+      final results = await Future.wait([
+        _dbService.getChatHistoryForAI(widget.isPremium),
+        _dbService.getSummary(),
+      ]);
 
     List<Map<String, dynamic>> newMessages =
         results[0] as List<Map<String, dynamic>>;
@@ -133,21 +132,8 @@ class _ChatScreenState extends State<ChatScreen> {
           : Future.value(),
     ]);
 
-      _aiService.init(widget.studentName, promptDetails, widget.isPremium);
-
-      String summary = await _aiService.summarizeChat(
-        widget.isPremium,
-        chatHistory,
-      );
-      SecureLogger.log("ChatScreen", "Sommario Iniziale: $summary");
-
-      final aiResults = await Future.wait([
-        _aiService.sendMessage(summary),
-        _dbService.saveSummary("Sommario Chat:\n$summary"),
-      ]);
-
-      fullResponse = aiResults[0] as String;
-      await _dbService.sendMessage(fullResponse, false);
+    fullResponse = aiResults[0] as String;
+    await _dbService.sendMessage(fullResponse, false);
     } catch (e) {
       SecureLogger.log("ChatScreen", "Init Error: $e");
     } finally {
@@ -271,7 +257,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: _dbService.getMessagesStream(widget.isPremium),
+              stream: _messagesStream,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());

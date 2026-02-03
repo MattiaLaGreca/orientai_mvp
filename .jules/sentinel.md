@@ -27,3 +27,8 @@
 **Vulnerability:** Chat history content containing newlines could manipulate the summarizer's system prompt context, potentially allowing users to spoof roles or inject instructions into the summary generation process.
 **Learning:** Data from the database (chat history), even if originated from the user previously, must be treated as untrusted when re-contextualized into a new prompt. Structure-preserving characters like newlines are dangerous in flat-text prompts.
 **Prevention:** Flatten and sanitize all user/model content before injecting it into meta-prompts like summarization. Used `Validators.sanitizeForPrompt` to strip control characters.
+
+## 2026-05-25 - Implicit Network Insecurity via Manifest Merging
+**Vulnerability:** The release build lacked explicit `INTERNET` permission and cleartext traffic restrictions because development manifests (`debug`/`profile`) defined them, masking the omission in `main`.
+**Learning:** Relying on framework defaults or build-type overrides can lead to "Security by Accident" (works in dev, breaks or is insecure in prod). A missing `INTERNET` permission in production is a Denial of Service via Configuration.
+**Prevention:** Explicitly define all critical permissions and security configurations (like `usesCleartextTraffic="false"`) in the `main` `AndroidManifest.xml`, effectively treating it as the source of truth for the final artifact.
