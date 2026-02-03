@@ -34,7 +34,6 @@ class _ChatScreenState extends State<ChatScreen> {
   final DatabaseService _dbService = DatabaseService();
 
   late Stream<QuerySnapshot> _messagesStream;
-  bool _showClearButton = false;
 
   bool _isAiTyping = true;
   bool _isInitializing = true;
@@ -230,6 +229,17 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     final themeColor = widget.isPremium ? Colors.black87 : Colors.indigo;
 
+    // ⚡ Bolt Optimization: Memoize stylesheets to avoid recreation in ListView loop
+    final userStyleSheet = MarkdownStyleSheet(
+      p: const TextStyle(color: Colors.white),
+      strong: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+    );
+
+    final aiStyleSheet = MarkdownStyleSheet(
+      p: const TextStyle(color: Colors.black87),
+      strong: TextStyle(color: themeColor, fontWeight: FontWeight.bold),
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("OrientAI"),
@@ -317,15 +327,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         ),
                         child: MarkdownBody(
                           data: data['text'] ?? '',
-                          styleSheet: MarkdownStyleSheet(
-                            p: TextStyle(
-                              color: isUser ? Colors.white : Colors.black87,
-                            ),
-                            strong: TextStyle(
-                              color: isUser ? Colors.white : themeColor,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          styleSheet: isUser ? userStyleSheet : aiStyleSheet,
                         ),
                       ),
                     );
