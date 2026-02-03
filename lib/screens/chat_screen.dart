@@ -34,7 +34,6 @@ class _ChatScreenState extends State<ChatScreen> {
   final DatabaseService _dbService = DatabaseService();
 
   late Stream<QuerySnapshot> _messagesStream;
-  bool _showClearButton = false;
 
   bool _isAiTyping = true;
   bool _isInitializing = true;
@@ -48,7 +47,6 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     _messagesStream = _dbService.getMessagesStream(widget.isPremium);
-    _controller.addListener(_onTextChanged);
     _initChat();
 
     // Inizializza Ads solo se non è premium
@@ -81,7 +79,6 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
-    _controller.removeListener(_onTextChanged);
     _controller.dispose();
     _scrollController.dispose();
     _streamedResponseNotifier.dispose();
@@ -90,7 +87,8 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _initChat() async {
-    final results = await Future.wait([
+    try {
+      final results = await Future.wait([
       _dbService.getChatHistoryForAI(widget.isPremium),
       _dbService.getSummary(),
     ]);
@@ -132,19 +130,6 @@ class _ChatScreenState extends State<ChatScreen> {
           ? _dbService.saveSummary("Sommario Chat:\n$summary")
           : Future.value(),
     ]);
-
-      _aiService.init(widget.studentName, promptDetails, widget.isPremium);
-
-      String summary = await _aiService.summarizeChat(
-        widget.isPremium,
-        chatHistory,
-      );
-      SecureLogger.log("ChatScreen", "Sommario Iniziale: $summary");
-
-      final aiResults = await Future.wait([
-        _aiService.sendMessage(summary),
-        _dbService.saveSummary("Sommario Chat:\n$summary"),
-      ]);
 
       fullResponse = aiResults[0] as String;
       await _dbService.sendMessage(fullResponse, false);
@@ -244,6 +229,17 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     final themeColor = widget.isPremium ? Colors.black87 : Colors.indigo;
 
+    // ⚡ Bolt Optimization: Memoize stylesheets to avoid recreation in ListView loop
+    final userStyleSheet = MarkdownStyleSheet(
+      p: const TextStyle(color: Colors.white),
+      strong: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+    );
+
+    final aiStyleSheet = MarkdownStyleSheet(
+      p: const TextStyle(color: Colors.black87),
+      strong: TextStyle(color: themeColor, fontWeight: FontWeight.bold),
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("OrientAI"),
@@ -271,7 +267,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: _dbService.getMessagesStream(widget.isPremium),
+              stream: _messagesStream,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -331,15 +327,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         ),
                         child: MarkdownBody(
                           data: data['text'] ?? '',
-                          styleSheet: MarkdownStyleSheet(
-                            p: TextStyle(
-                              color: isUser ? Colors.white : Colors.black87,
-                            ),
-                            strong: TextStyle(
-                              color: isUser ? Colors.white : themeColor,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          styleSheet: isUser ? userStyleSheet : aiStyleSheet,
                         ),
                       ),
                     );
