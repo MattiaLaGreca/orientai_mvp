@@ -8,3 +8,7 @@
 ## 2026-03-24 - [Regex Compilation in Hot Paths]
 **Learning:** Input validation methods (sanitization/security) are called frequently. Inline `RegExp` instantiation causes unnecessary recompilation overhead.
 **Action:** Always extract `RegExp` to `static final` constants in utility classes like `Validators`.
+
+## 2026-03-25 - [Flutter ListView Builder Allocations]
+**Learning:** Instantiating complex objects (like `MarkdownStyleSheet`) inside `ListView.builder`'s `itemBuilder` causes unnecessary object allocation and garbage collection pressure on every scroll frame.
+**Action:** Pre-calculate or memoize immutable style configurations outside the `itemBuilder` (e.g., in `build` or `initState`) and reuse the instance.
