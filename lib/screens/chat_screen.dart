@@ -90,10 +90,11 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _initChat() async {
-    final results = await Future.wait([
-      _dbService.getChatHistoryForAI(widget.isPremium),
-      _dbService.getSummary(),
-    ]);
+    try {
+      final results = await Future.wait([
+        _dbService.getChatHistoryForAI(widget.isPremium),
+        _dbService.getSummary(),
+      ]);
 
     List<Map<String, dynamic>> newMessages =
         results[0] as List<Map<String, dynamic>>;
@@ -133,19 +134,6 @@ class _ChatScreenState extends State<ChatScreen> {
           : Future.value(),
     ]);
 
-      _aiService.init(widget.studentName, promptDetails, widget.isPremium);
-
-      String summary = await _aiService.summarizeChat(
-        widget.isPremium,
-        chatHistory,
-      );
-      SecureLogger.log("ChatScreen", "Sommario Iniziale: $summary");
-
-      final aiResults = await Future.wait([
-        _aiService.sendMessage(summary),
-        _dbService.saveSummary("Sommario Chat:\n$summary"),
-      ]);
-
       fullResponse = aiResults[0] as String;
       await _dbService.sendMessage(fullResponse, false);
     } catch (e) {
@@ -158,6 +146,12 @@ class _ChatScreenState extends State<ChatScreen> {
         });
       }
     }
+  }
+
+  void _onTextChanged() {
+    setState(() {
+      _showClearButton = _controller.text.isNotEmpty;
+    });
   }
 
   void _scrollToBottom() {
@@ -367,6 +361,15 @@ class _ChatScreenState extends State<ChatScreen> {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(25),
                       ),
+                      suffixIcon: _showClearButton
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                _controller.clear();
+                              },
+                              tooltip: "Cancella testo",
+                            )
+                          : null,
                     ),
                     onSubmitted: (_) => _isAiTyping ? null : _handleSend(),
                   ),
