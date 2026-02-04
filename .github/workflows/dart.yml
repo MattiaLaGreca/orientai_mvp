@@ -21,11 +21,9 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          # You can specify a version if needed, or leave it to pick the latest stable
-          # flutter-version: '3.19.0'
 
       - name: Create secrets.dart
-        run: echo "const String GEMINI_API_KEY = 'TEST_KEY';" > lib/secrets.dart
+        run: echo "const String geminiApiKey = 'dummy_key';" > lib/secrets.dart
 
       - name: Install dependencies
         run: flutter pub get

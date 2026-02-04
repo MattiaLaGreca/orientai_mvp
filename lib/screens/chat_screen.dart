@@ -48,6 +48,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
+    _controller.addListener(_onTextChanged);
     _messagesStream = _dbService.getMessagesStream(widget.isPremium);
     _initChat();
 
@@ -81,6 +82,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
+    _controller.removeListener(_onTextChanged);
     _controller.dispose();
     _scrollController.dispose();
     _streamedResponseNotifier.dispose();
@@ -184,15 +186,20 @@ class _ChatScreenState extends State<ChatScreen> {
     text = Validators.cleanMessage(text);
     if (text.isEmpty) return;
 
+    // ⚡ Bolt Optimization: Optimistic UI Updates & Parallel Execution
+    // Clear input and show typing indicator immediately (0ms latency)
     _controller.clear();
-
-    try {
-      await _dbService.sendMessage(text, true);
-
-      _streamedResponseNotifier.value = "";
+    _streamedResponseNotifier.value = "";
+    if (mounted) {
       setState(() {
         _isAiTyping = true;
       });
+    }
+
+    try {
+      // Start DB write (User Message) and AI request in parallel.
+      // We don't await the DB write immediately so the AI request starts ASAP.
+      final userMessageSaveFuture = _dbService.sendMessage(text, true);
 
       if (widget.isPremium) {
         fullResponse = await _aiService.sendMessageWithStreaming(text, (chunk) {
@@ -205,24 +212,17 @@ class _ChatScreenState extends State<ChatScreen> {
         fullResponse = await _aiService.sendMessage(text);
       }
 
+      // Ensure user message is saved before saving AI response.
+      // This maintains data integrity while having allowed parallelism during AI latency.
+      await userMessageSaveFuture;
+
+      // Save AI Response
       await _dbService.sendMessage(fullResponse, false);
-    } on OrientAIDataException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.message),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
     } catch (e) {
-      SecureLogger.log("ChatScreen", "HandleSend Error: $e");
+      SecureLogger.log("ChatScreen", "Send Error: $e");
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Si è verificato un errore. Riprova."),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text("Errore durante l'invio: $e")),
         );
       }
     } finally {

@@ -1,12 +1,14 @@
 import 'package:google_generative_ai/google_generative_ai.dart';
-import 'package:orientai/secrets.dart';
+// ignore: constant_identifier_names
+import 'package:orientai/secrets.dart' as secrets;
 import '../utils/secure_logger.dart';
 import '../utils/validators.dart';
 import '../utils/ai_wrappers.dart';
 
 class OrientAIService {
   // ⚠️ IMPORTANTE: Assicurati che qui ci sia la tua API KEY corretta!
-  static const String _apiKey = GEMINI_API_KEY;
+  // ignore: constant_identifier_names
+  static const String _apiKey = secrets.geminiApiKey;
   
   late final GenerativeModelWrapper _model;
   late final ChatSessionWrapper _chat;
