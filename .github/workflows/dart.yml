@@ -23,7 +23,7 @@ jobs:
           channel: 'stable'
 
       - name: Create secrets.dart
-        run: echo "const String GEMINI_API_KEY = 'dummy_key';" > lib/secrets.dart
+        run: echo "const String geminiApiKey = 'dummy_key';" > lib/secrets.dart
 
       - name: Install dependencies
         run: flutter pub get

@@ -33,9 +33,13 @@ class DatabaseService {
     } on FirebaseAuthException catch (e) {
       SecureLogger.log("SignUp Firebase Error", e);
       String msg = "Impossibile completare la registrazione.";
-      if (e.code == 'email-already-in-use') msg = "Questa email è già registrata.";
-      else if (e.code == 'weak-password') msg = "La password è troppo debole.";
-      else if (e.code == 'invalid-email') msg = "L'email non è valida.";
+      if (e.code == 'email-already-in-use') {
+        msg = "Questa email è già registrata.";
+      } else if (e.code == 'weak-password') {
+        msg = "La password è troppo debole.";
+      } else if (e.code == 'invalid-email') {
+        msg = "L'email non è valida.";
+      }
       throw OrientAIAuthException(msg, code: e.code);
     } catch (e) {
       SecureLogger.log("SignUp Generic Error", e);
