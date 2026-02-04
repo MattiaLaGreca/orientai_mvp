@@ -9,9 +9,9 @@ class OrientAIException implements Exception {
 }
 
 class OrientAIAuthException extends OrientAIException {
-  OrientAIAuthException(String message, {String? code}) : super(message, code: code);
+  OrientAIAuthException(super.message, {super.code});
 }
 
 class OrientAIDataException extends OrientAIException {
-  OrientAIDataException(String message, {String? code}) : super(message, code: code);
+  OrientAIDataException(super.message, {super.code});
 }

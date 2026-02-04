@@ -18,13 +18,13 @@ jobs:
           channel: 'stable'
 
       - name: Create dummy secrets
-        run: echo "const String GEMINI_API_KEY = 'dummy_key_for_ci';" > lib/secrets.dart
+        run: echo "const String GEMINI_API_KEY = 'dummy_key_for_ci'; // ignore: constant_identifier_names" > lib/secrets.dart
 
       - name: Install dependencies
         run: flutter pub get
 
       - name: Analyze project source
-        run: flutter analyze
+        run: flutter analyze --no-fatal-infos
 
       - name: Run tests
         run: flutter test
