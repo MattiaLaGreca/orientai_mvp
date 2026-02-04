@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../services/ai_service.dart';
 import '../services/database_service.dart';
+import '../utils/custom_exceptions.dart';
 import '../utils/secure_logger.dart';
 import '../utils/validators.dart';
 import 'profile_screen.dart';

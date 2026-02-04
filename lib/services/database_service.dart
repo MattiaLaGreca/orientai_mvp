@@ -170,9 +170,22 @@ class DatabaseService {
     }
   }
 
+  DateTime? _lastMessageTime;
+
   Future<void> sendMessage(String text, bool isUser) async {
     final user = _auth.currentUser;
     if (user == null) return;
+
+    // 🔒 Sentinel Security: Rate Limiting
+    if (isUser) {
+      final now = DateTime.now();
+      if (_lastMessageTime != null &&
+          now.difference(_lastMessageTime!) < const Duration(milliseconds: 500)) {
+        throw OrientAIDataException(
+            "Stai inviando messaggi troppo velocemente. Attendi un attimo.");
+      }
+      _lastMessageTime = now;
+    }
 
     try {
       await _db
