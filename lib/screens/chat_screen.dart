@@ -38,6 +38,7 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _isAiTyping = true;
   bool _isInitializing = true;
   String fullResponse = "";
+  bool _showClearButton = false;
 
   // Ads
   BannerAd? _bannerAd;
@@ -47,6 +48,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     _messagesStream = _dbService.getMessagesStream(widget.isPremium);
+    _controller.addListener(_onTextChanged);
     _initChat();
 
     // Inizializza Ads solo se non è premium
@@ -79,6 +81,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
+    _controller.removeListener(_onTextChanged);
     _controller.dispose();
     _scrollController.dispose();
     _streamedResponseNotifier.dispose();
@@ -376,7 +379,9 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
                 IconButton(
                   icon: const Icon(Icons.send),
-                  onPressed: _isAiTyping ? null : _handleSend,
+                  onPressed: (_isAiTyping || _controller.text.trim().isEmpty)
+                      ? null
+                      : _handleSend,
                   color: themeColor,
                   tooltip: "Invia messaggio",
                 ),
