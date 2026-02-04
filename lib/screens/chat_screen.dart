@@ -37,6 +37,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   bool _isAiTyping = true;
   bool _isInitializing = true;
+  bool _showClearButton = false;
   String fullResponse = "";
 
   // Ads
@@ -46,6 +47,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
+    _controller.addListener(_onTextChanged);
     _messagesStream = _dbService.getMessagesStream(widget.isPremium);
     _initChat();
 
@@ -79,6 +81,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
+    _controller.removeListener(_onTextChanged);
     _controller.dispose();
     _scrollController.dispose();
     _streamedResponseNotifier.dispose();
@@ -182,32 +185,51 @@ class _ChatScreenState extends State<ChatScreen> {
     text = Validators.cleanMessage(text);
     if (text.isEmpty) return;
 
+    // ⚡ Bolt Optimization: Optimistic UI Updates & Parallel Execution
+    // Clear input and show typing indicator immediately (0ms latency)
     _controller.clear();
-
-    await _dbService.sendMessage(text, true);
-
     _streamedResponseNotifier.value = "";
-    setState(() {
-      _isAiTyping = true;
-    });
-
-    if (widget.isPremium) {
-      fullResponse = await _aiService.sendMessageWithStreaming(text, (chunk) {
-        if (mounted) {
-          _streamedResponseNotifier.value = chunk;
-          _scrollToBottom();
-        }
-      });
-    } else {
-      fullResponse = await _aiService.sendMessage(text);
-    }
-
-    await _dbService.sendMessage(fullResponse, false);
-
     if (mounted) {
       setState(() {
-        _isAiTyping = false;
+        _isAiTyping = true;
       });
+    }
+
+    try {
+      // Start DB write (User Message) and AI request in parallel.
+      // We don't await the DB write immediately so the AI request starts ASAP.
+      final userMessageSaveFuture = _dbService.sendMessage(text, true);
+
+      if (widget.isPremium) {
+        fullResponse = await _aiService.sendMessageWithStreaming(text, (chunk) {
+          if (mounted) {
+            _streamedResponseNotifier.value = chunk;
+            _scrollToBottom();
+          }
+        });
+      } else {
+        fullResponse = await _aiService.sendMessage(text);
+      }
+
+      // Ensure user message is saved before saving AI response.
+      // This maintains data integrity while having allowed parallelism during AI latency.
+      await userMessageSaveFuture;
+
+      // Save AI Response
+      await _dbService.sendMessage(fullResponse, false);
+    } catch (e) {
+      SecureLogger.log("ChatScreen", "Send Error: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Errore durante l'invio: $e")),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isAiTyping = false;
+        });
+      }
     }
   }
 

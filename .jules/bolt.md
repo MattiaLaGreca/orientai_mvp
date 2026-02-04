@@ -12,3 +12,7 @@
 ## 2026-03-25 - [Flutter ListView Builder Allocations]
 **Learning:** Instantiating complex objects (like `MarkdownStyleSheet`) inside `ListView.builder`'s `itemBuilder` causes unnecessary object allocation and garbage collection pressure on every scroll frame.
 **Action:** Pre-calculate or memoize immutable style configurations outside the `itemBuilder` (e.g., in `build` or `initState`) and reuse the instance.
+
+## 2026-03-25 - [Parallelizing Dependent Operations]
+**Learning:** In chat interfaces, waiting for the user message to be persisted (DB) before triggering the AI response introduces unnecessary latency.
+**Action:** Use "Optimistic UI" to update the view immediately, then run the DB write and AI request in parallel `Future`s. Await the DB write only when strict data consistency/ordering is required (e.g., before saving the AI response).
