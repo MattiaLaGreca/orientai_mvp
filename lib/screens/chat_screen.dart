@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../services/ai_service.dart';
 import '../services/database_service.dart';
+import '../utils/custom_exceptions.dart';
 import '../utils/secure_logger.dart';
 import '../utils/validators.dart';
 import 'profile_screen.dart';
@@ -37,6 +38,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   bool _isAiTyping = true;
   bool _isInitializing = true;
+  bool _showClearButton = false;
   String fullResponse = "";
 
   // Ads
@@ -184,30 +186,51 @@ class _ChatScreenState extends State<ChatScreen> {
 
     _controller.clear();
 
-    await _dbService.sendMessage(text, true);
+    try {
+      await _dbService.sendMessage(text, true);
 
-    _streamedResponseNotifier.value = "";
-    setState(() {
-      _isAiTyping = true;
-    });
-
-    if (widget.isPremium) {
-      fullResponse = await _aiService.sendMessageWithStreaming(text, (chunk) {
-        if (mounted) {
-          _streamedResponseNotifier.value = chunk;
-          _scrollToBottom();
-        }
-      });
-    } else {
-      fullResponse = await _aiService.sendMessage(text);
-    }
-
-    await _dbService.sendMessage(fullResponse, false);
-
-    if (mounted) {
+      _streamedResponseNotifier.value = "";
       setState(() {
-        _isAiTyping = false;
+        _isAiTyping = true;
       });
+
+      if (widget.isPremium) {
+        fullResponse = await _aiService.sendMessageWithStreaming(text, (chunk) {
+          if (mounted) {
+            _streamedResponseNotifier.value = chunk;
+            _scrollToBottom();
+          }
+        });
+      } else {
+        fullResponse = await _aiService.sendMessage(text);
+      }
+
+      await _dbService.sendMessage(fullResponse, false);
+    } on OrientAIDataException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.message),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      SecureLogger.log("ChatScreen", "HandleSend Error: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Si è verificato un errore. Riprova."),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isAiTyping = false;
+        });
+      }
     }
   }
 
