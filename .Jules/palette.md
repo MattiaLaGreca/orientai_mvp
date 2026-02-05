@@ -29,3 +29,7 @@
 ## 2026-03-10 - Stream Performance in Inputs
 **Learning:** Initializing streams inside `build` causes unnecessary restarts when keyboard state (setState) changes, causing UI jank.
 **Action:** Always initialize `Stream` objects in `initState` to ensure input interactions (typing/clearing) remain 60fps smooth.
+
+## 2026-03-11 - Blocking Interactions During Loading
+**Learning:** Disabling only the submit button is insufficient; users can still edit fields during the request.
+**Action:** Use `ModalBarrier` in the `Stack` to reliably block all form interactions during loading states.
