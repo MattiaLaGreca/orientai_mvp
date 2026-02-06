@@ -16,3 +16,7 @@
 ## 2026-03-25 - [Parallelizing Dependent Operations]
 **Learning:** In chat interfaces, waiting for the user message to be persisted (DB) before triggering the AI response introduces unnecessary latency.
 **Action:** Use "Optimistic UI" to update the view immediately, then run the DB write and AI request in parallel `Future`s. Await the DB write only when strict data consistency/ordering is required (e.g., before saving the AI response).
+
+## 2026-03-25 - [Input Latency & Global SetState]
+**Learning:** Using `setState` to update a single boolean flag (like `_showClearButton`) triggers a rebuild of the entire Widget tree. When attached to a text listener, this rebuilds the UI on every keystroke, causing jank on low-end devices.
+**Action:** Use `ValueNotifier<bool>` and `ValueListenableBuilder` to isolate updates to only the specific widget that needs to change (e.g., the suffix icon), preventing the expensive `ListView` from rebuilding.

@@ -31,14 +31,16 @@ class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final ValueNotifier<String> _streamedResponseNotifier = ValueNotifier("");
+  final ValueNotifier<bool> _showClearButtonNotifier = ValueNotifier(false);
   final OrientAIService _aiService = OrientAIService();
   final DatabaseService _dbService = DatabaseService();
 
   late Stream<QuerySnapshot> _messagesStream;
+  late final MarkdownStyleSheet _userStyleSheet;
+  late final MarkdownStyleSheet _aiStyleSheet;
 
   bool _isAiTyping = true;
   bool _isInitializing = true;
-  bool _showClearButton = false;
   String fullResponse = "";
 
   // Ads
@@ -50,6 +52,18 @@ class _ChatScreenState extends State<ChatScreen> {
     super.initState();
     _controller.addListener(_onTextChanged);
     _messagesStream = _dbService.getMessagesStream(widget.isPremium);
+
+    // ⚡ Bolt Optimization: Pre-calculate stylesheets to avoid recreation
+    final themeColor = widget.isPremium ? Colors.black87 : Colors.indigo;
+    _userStyleSheet = MarkdownStyleSheet(
+      p: const TextStyle(color: Colors.white),
+      strong: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+    );
+    _aiStyleSheet = MarkdownStyleSheet(
+      p: const TextStyle(color: Colors.black87),
+      strong: TextStyle(color: themeColor, fontWeight: FontWeight.bold),
+    );
+
     _initChat();
 
     // Inizializza Ads solo se non è premium
@@ -86,6 +100,7 @@ class _ChatScreenState extends State<ChatScreen> {
     _controller.dispose();
     _scrollController.dispose();
     _streamedResponseNotifier.dispose();
+    _showClearButtonNotifier.dispose();
     _bannerAd?.dispose();
     super.dispose();
   }
@@ -150,9 +165,8 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _onTextChanged() {
-    setState(() {
-      _showClearButton = _controller.text.isNotEmpty;
-    });
+    // ⚡ Bolt Optimization: Use ValueNotifier instead of setState to avoid rebuilding entire ChatScreen on every keystroke
+    _showClearButtonNotifier.value = _controller.text.isNotEmpty;
   }
 
   // 🔒 Sentinel Security: Prevent malicious links
@@ -279,17 +293,6 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     final themeColor = widget.isPremium ? Colors.black87 : Colors.indigo;
 
-    // ⚡ Bolt Optimization: Memoize stylesheets to avoid recreation in ListView loop
-    final userStyleSheet = MarkdownStyleSheet(
-      p: const TextStyle(color: Colors.white),
-      strong: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-    );
-
-    final aiStyleSheet = MarkdownStyleSheet(
-      p: const TextStyle(color: Colors.black87),
-      strong: TextStyle(color: themeColor, fontWeight: FontWeight.bold),
-    );
-
     return Scaffold(
       appBar: AppBar(
         title: const Text("OrientAI"),
@@ -380,8 +383,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         ),
                         child: MarkdownBody(
                           data: data['text'] ?? '',
-                          styleSheet: isUser ? userStyleSheet : aiStyleSheet,
-                          onTapLink: _handleLinkTap,
+                          styleSheet: isUser ? _userStyleSheet : _aiStyleSheet,
                         ),
                       ),
                     );
@@ -396,30 +398,35 @@ class _ChatScreenState extends State<ChatScreen> {
             child: Row(
               children: [
                 Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    minLines: 1,
-                    maxLines: 4,
-                    textCapitalization: TextCapitalization.sentences,
-                    textInputAction: TextInputAction.send,
-                    maxLength: 2000,
-                    decoration: InputDecoration(
-                      hintText: "Scrivi un messaggio...",
-                      counterText: "",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                      suffixIcon: _showClearButton
-                          ? IconButton(
-                              icon: const Icon(Icons.clear),
-                              onPressed: () {
-                                _controller.clear();
-                              },
-                              tooltip: "Cancella testo",
-                            )
-                          : null,
-                    ),
-                    onSubmitted: (_) => _isAiTyping ? null : _handleSend(),
+                  child: ValueListenableBuilder<bool>(
+                    valueListenable: _showClearButtonNotifier,
+                    builder: (context, showClearButton, child) {
+                      return TextField(
+                        controller: _controller,
+                        minLines: 1,
+                        maxLines: 4,
+                        textCapitalization: TextCapitalization.sentences,
+                        textInputAction: TextInputAction.send,
+                        maxLength: 2000,
+                        decoration: InputDecoration(
+                          hintText: "Scrivi un messaggio...",
+                          counterText: "",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                          suffixIcon: showClearButton
+                              ? IconButton(
+                                  icon: const Icon(Icons.clear),
+                                  onPressed: () {
+                                    _controller.clear();
+                                  },
+                                  tooltip: "Cancella testo",
+                                )
+                              : null,
+                        ),
+                        onSubmitted: (_) => _isAiTyping ? null : _handleSend(),
+                      );
+                    },
                   ),
                 ),
                 IconButton(
