@@ -289,6 +289,35 @@ class _ChatScreenState extends State<ChatScreen> {
     await _dbService.signOut();
   }
 
+  Widget _buildEmptyState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.chat_bubble_outline, size: 64, color: Colors.grey[300]),
+            const SizedBox(height: 16),
+            Text(
+              "Ciao ${widget.studentName}!",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "Non ci sono messaggi. Scrivi qualcosa per iniziare la conversazione!",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.grey[500]),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeColor = widget.isPremium ? Colors.black87 : Colors.indigo;
@@ -327,6 +356,10 @@ class _ChatScreenState extends State<ChatScreen> {
                 }
 
                 final docs = snapshot.data!.docs;
+
+                if (docs.isEmpty && !_isAiTyping) {
+                  return _buildEmptyState();
+                }
 
                 return ListView.builder(
                   controller: _scrollController,
