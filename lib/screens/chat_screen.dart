@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../services/ai_service.dart';
 import '../services/database_service.dart';
-import '../utils/custom_exceptions.dart';
 import '../utils/secure_logger.dart';
 import '../utils/validators.dart';
 import 'profile_screen.dart';
@@ -153,6 +153,27 @@ class _ChatScreenState extends State<ChatScreen> {
     setState(() {
       _showClearButton = _controller.text.isNotEmpty;
     });
+  }
+
+  // 🔒 Sentinel Security: Prevent malicious links
+  void _handleLinkTap(String text, String? href, String title) {
+    if (href == null) return;
+
+    if (!Validators.isSafeUrl(href)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Link bloccato per sicurezza (protocollo non supportato)."),
+            backgroundColor: Colors.orange,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      return;
+    }
+
+    // Launch safe URL
+    launchUrl(Uri.parse(href), mode: LaunchMode.externalApplication).ignore();
   }
 
   void _scrollToBottom() {
@@ -326,7 +347,10 @@ class _ChatScreenState extends State<ChatScreen> {
                           child: ValueListenableBuilder<String>(
                             valueListenable: _streamedResponseNotifier,
                             builder: (context, value, child) {
-                              return MarkdownBody(data: "$value ▋");
+                              return MarkdownBody(
+                                data: "$value ▋",
+                                onTapLink: _handleLinkTap,
+                              );
                             },
                           ),
                         ),
@@ -357,6 +381,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         child: MarkdownBody(
                           data: data['text'] ?? '',
                           styleSheet: isUser ? userStyleSheet : aiStyleSheet,
+                          onTapLink: _handleLinkTap,
                         ),
                       ),
                     );

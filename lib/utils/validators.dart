@@ -60,4 +60,13 @@ class Validators {
     // Remove all control characters including \n, \r, \t (0x00-0x1F and 0x7F)
     return input.replaceAll(_allControlChars, ' ').trim();
   }
+
+  /// 🔒 Sentinel Security: Validates URL Scheme
+  /// Only allows http and https schemes to prevent XSS (javascript:) and LFI (file:).
+  static bool isSafeUrl(String? url) {
+    if (url == null || url.trim().isEmpty) return false;
+    final uri = Uri.tryParse(url);
+    if (uri == null || !uri.hasScheme) return false;
+    return ['http', 'https'].contains(uri.scheme.toLowerCase());
+  }
 }
