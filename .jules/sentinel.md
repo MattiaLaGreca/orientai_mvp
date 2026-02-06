@@ -32,3 +32,8 @@
 **Vulnerability:** The release build lacked explicit `INTERNET` permission and cleartext traffic restrictions because development manifests (`debug`/`profile`) defined them, masking the omission in `main`.
 **Learning:** Relying on framework defaults or build-type overrides can lead to "Security by Accident" (works in dev, breaks or is insecure in prod). A missing `INTERNET` permission in production is a Denial of Service via Configuration.
 **Prevention:** Explicitly define all critical permissions and security configurations (like `usesCleartextTraffic="false"`) in the `main` `AndroidManifest.xml`, effectively treating it as the source of truth for the final artifact.
+
+## 2026-05-26 - Unrestricted Link Execution in Chat
+**Vulnerability:** The `flutter_markdown` widget by default attempts to launch any URL provided in a link, including potentially dangerous schemes like `javascript:`, `file:`, or `sms:` if not explicitly handled.
+**Learning:** Rendering User/AI generated Markdown without a custom `onTapLink` handler implicitly trusts the content source, which is unsafe for an LLM-powered app where the AI might hallucinate or be tricked into outputting malicious links.
+**Prevention:** Always implement a strict `onTapLink` handler for `MarkdownBody` that validates the URL scheme (allow-list `http`/`https` only) before passing it to `url_launcher`.

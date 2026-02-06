@@ -101,4 +101,26 @@ void main() {
       expect(output, "Mario");
     });
   });
+
+  group('URL Security Tests', () {
+    test('Safe URLs should pass', () {
+      expect(Validators.isSafeUrl('http://example.com'), true);
+      expect(Validators.isSafeUrl('https://secure.site.org/page?query=1'), true);
+      expect(Validators.isSafeUrl('HTTPS://UPPERCASE.COM'), true);
+    });
+
+    test('Unsafe URLs should fail', () {
+      expect(Validators.isSafeUrl('javascript:alert(1)'), false);
+      expect(Validators.isSafeUrl('file:///etc/passwd'), false);
+      expect(Validators.isSafeUrl('data:text/html,<script>'), false);
+      expect(Validators.isSafeUrl('ftp://server.com'), false); // Only http/s allowed
+    });
+
+    test('Malformed/Empty URLs should fail', () {
+      expect(Validators.isSafeUrl(''), false);
+      expect(Validators.isSafeUrl(null), false);
+      expect(Validators.isSafeUrl('justtext'), false);
+      expect(Validators.isSafeUrl('www.google.com'), false, reason: 'Missing scheme');
+    });
+  });
 }
