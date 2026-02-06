@@ -13,6 +13,11 @@
 **Learning:** Security logic (validators, sanitizers) must be decoupled from UI components. Embedding regex strings in widgets makes them hard to test and maintain.
 **Prevention:** Extract all validation logic into a shared `lib/utils/validators.dart` module. This ensures the UI and the Tests rely on the exact same source of truth.
 
+## 2026-02-06 - Unsafe Link Execution via Markdown
+**Vulnerability:** The Chat UI used `flutter_markdown` without a custom `onTapLink` handler, relying on default behavior which could potentially launch unsafe schemes (`file:`, `javascript:`) or facilitate phishing. Additionally, `Validators.isSafeUrl` was missing despite being documented, creating a "security debt" gap.
+**Learning:** Documentation and Memory are not Code. A feature described in "Release Notes" or "Memory" might be missing in reality. Trust code, verify implementation. Default widget behaviors are often convenience-first, not security-first.
+**Prevention:** Explicitly implement `onTapLink` for all Markdown widgets. Whitelist only `http` and `https` schemes using a centralized validator (`Validators.isSafeUrl`). Enforce manifest queries for Android 11+ visibility.
+
 ## 2026-02-28 - Prompt Injection via User Profile
 **Vulnerability:** The AI System Instruction interpolated user data (`$studentName`) directly. A malicious user could inject newlines and fake instructions into their name to override the AI's persona.
 **Learning:** Even simple profile fields like "Name" are attack vectors in LLM applications if they are injected into the system prompt.

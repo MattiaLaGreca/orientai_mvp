@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../services/ai_service.dart';
 import '../services/database_service.dart';
 import '../utils/custom_exceptions.dart';
@@ -254,6 +255,35 @@ class _ChatScreenState extends State<ChatScreen> {
     await _dbService.signOut();
   }
 
+  void _onTapLink(String text, String? href, String title) {
+    if (href == null) return;
+
+    // 🔒 Sentinel Security: Validate URL Scheme
+    if (!Validators.isSafeUrl(href)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Link non sicuro bloccato per sicurezza."),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
+    }
+
+    // Launch safe URL
+    try {
+      launchUrl(Uri.parse(href), mode: LaunchMode.externalApplication);
+    } catch (e) {
+      SecureLogger.log("LinkLaunch", "Error launching url: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Impossibile aprire il link.")),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeColor = widget.isPremium ? Colors.black87 : Colors.indigo;
@@ -326,7 +356,10 @@ class _ChatScreenState extends State<ChatScreen> {
                           child: ValueListenableBuilder<String>(
                             valueListenable: _streamedResponseNotifier,
                             builder: (context, value, child) {
-                              return MarkdownBody(data: "$value ▋");
+                              return MarkdownBody(
+                                data: "$value ▋",
+                                onTapLink: _onTapLink,
+                              );
                             },
                           ),
                         ),
@@ -357,6 +390,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         child: MarkdownBody(
                           data: data['text'] ?? '',
                           styleSheet: isUser ? userStyleSheet : aiStyleSheet,
+                          onTapLink: _onTapLink,
                         ),
                       ),
                     );

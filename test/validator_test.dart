@@ -101,4 +101,24 @@ void main() {
       expect(output, "Mario");
     });
   });
+
+  group('URL Security Tests', () {
+    test('Valid URLs should pass', () {
+      expect(Validators.isSafeUrl('https://google.com'), true);
+      expect(Validators.isSafeUrl('http://example.com/page?query=1'), true);
+      expect(Validators.isSafeUrl('HTTPS://UPPERCASE.COM'), true);
+    });
+
+    test('Unsafe schemes should fail', () {
+      expect(Validators.isSafeUrl('javascript:alert(1)'), false);
+      expect(Validators.isSafeUrl('file:///etc/passwd'), false);
+      expect(Validators.isSafeUrl('data:text/plain;base64,SGVsbG8='), false);
+      expect(Validators.isSafeUrl('ftp://example.com'), false);
+    });
+
+    test('Malformed URLs should fail', () {
+      expect(Validators.isSafeUrl('not_a_url'), false);
+      expect(Validators.isSafeUrl(''), false);
+    });
+  });
 }
