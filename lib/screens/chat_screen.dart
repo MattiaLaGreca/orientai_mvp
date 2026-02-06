@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../services/ai_service.dart';
 import '../services/database_service.dart';
-import '../utils/custom_exceptions.dart';
 import '../utils/secure_logger.dart';
 import '../utils/validators.dart';
 import 'profile_screen.dart';
@@ -35,6 +34,8 @@ class _ChatScreenState extends State<ChatScreen> {
   final DatabaseService _dbService = DatabaseService();
 
   late Stream<QuerySnapshot> _messagesStream;
+  late MarkdownStyleSheet _userStyleSheet;
+  late MarkdownStyleSheet _aiStyleSheet;
 
   bool _isAiTyping = true;
   bool _isInitializing = true;
@@ -50,11 +51,34 @@ class _ChatScreenState extends State<ChatScreen> {
     super.initState();
     _controller.addListener(_onTextChanged);
     _messagesStream = _dbService.getMessagesStream(widget.isPremium);
+    _initStyleSheets();
     _initChat();
 
     // Inizializza Ads solo se non è premium
     if (!widget.isPremium) {
       _loadBannerAd();
+    }
+  }
+
+  void _initStyleSheets() {
+    final themeColor = widget.isPremium ? Colors.black87 : Colors.indigo;
+
+    _userStyleSheet = MarkdownStyleSheet(
+      p: const TextStyle(color: Colors.white),
+      strong: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+    );
+
+    _aiStyleSheet = MarkdownStyleSheet(
+      p: const TextStyle(color: Colors.black87),
+      strong: TextStyle(color: themeColor, fontWeight: FontWeight.bold),
+    );
+  }
+
+  @override
+  void didUpdateWidget(ChatScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isPremium != oldWidget.isPremium) {
+      _initStyleSheets();
     }
   }
 
@@ -258,17 +282,6 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     final themeColor = widget.isPremium ? Colors.black87 : Colors.indigo;
 
-    // ⚡ Bolt Optimization: Memoize stylesheets to avoid recreation in ListView loop
-    final userStyleSheet = MarkdownStyleSheet(
-      p: const TextStyle(color: Colors.white),
-      strong: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-    );
-
-    final aiStyleSheet = MarkdownStyleSheet(
-      p: const TextStyle(color: Colors.black87),
-      strong: TextStyle(color: themeColor, fontWeight: FontWeight.bold),
-    );
-
     return Scaffold(
       appBar: AppBar(
         title: const Text("OrientAI"),
@@ -356,7 +369,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         ),
                         child: MarkdownBody(
                           data: data['text'] ?? '',
-                          styleSheet: isUser ? userStyleSheet : aiStyleSheet,
+                          styleSheet: isUser ? _userStyleSheet : _aiStyleSheet,
                         ),
                       ),
                     );
