@@ -10,7 +10,7 @@ OrientAI è un'applicazione mobile sviluppata in Flutter che aiuta gli studenti 
 *   **Memoria Contestuale:** L'IA ricorda i dettagli della conversazione per offrire consigli coerenti e personalizzati.
 *   **Gestione Profilo:** Salva interessi, background scolastico e obiettivi per raffinare i suggerimenti.
 *   **Modello Sostenibile:** Accesso gratuito supportato da pubblicità (AdMob) o esperienza Premium senza interruzioni.
-*   **Sicurezza:** Gestione robusta degli errori, logging sanitizzato (PII protection) e autenticazione anonima/email sicura.
+*   **Sicurezza:** Gestione robusta degli errori, logging sanitizzato (PII protection), sanitizzazione input e validazione URL (anti-XSS).
 
 ## 🛠️ Tech Stack
 

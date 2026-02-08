@@ -1,14 +1,21 @@
 # Status Report - OrientAI
 
-**Data:** Gennaio 2026
+**Data:** Febbraio 2026
 **Versione:** 1.0.0+1
-**Fase:** Pre-Launch (MVP Ready)
+**Fase:** Pre-Launch (Release Candidate Verified)
 
 ## 🚦 Stato Generale: VERDE
 
 Il progetto è tecnicamente pronto per la generazione della build di rilascio (Release Candidate). Le funzionalità core sono stabili e testate.
 
 ## ✅ Completati Recentemente
+*   **Sicurezza e Sanitizzazione:**
+    *   Implementata `Validators.cleanMessage` per rimuovere caratteri di controllo invisibili.
+    *   Implementata whitelist URL (`http`/`https`) per prevenire XSS via Markdown links.
+    *   Aggiunti Unit Tests specifici per la sicurezza URL.
+*   **Performance:**
+    *   Ottimizzazione rendering Chat (Caching MarkdownStyleSheet).
+    *   Inizializzazione ottimizzata degli Stream (evita rebuild non necessari).
 *   **Refactoring Core:** Migliorata la testabilità dei servizi (`OrientAIService`, `DatabaseService`) con Dependency Injection.
 *   **Robustezza:** Implementata gestione errori utente (`_showError`) e logging sicuro (`SecureLogger`) per evitare leak di PII.
 *   **Stabilità Build:** Ripristinato ambiente di CI/Test con gestione sicura dei segreti (`lib/secrets.dart`).
