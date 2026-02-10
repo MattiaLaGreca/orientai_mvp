@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../utils/custom_exceptions.dart';
 import '../utils/secure_logger.dart';
+import '../utils/validators.dart';
 
 class DatabaseService {
   final FirebaseFirestore _db;
@@ -176,8 +177,13 @@ class DatabaseService {
     final user = _auth.currentUser;
     if (user == null) return;
 
-    // 🔒 Sentinel Security: Rate Limiting
+    // 🔒 Sentinel Security: Rate Limiting & Validation
     if (isUser) {
+      if (text.length > 2000) {
+        throw OrientAIDataException("Messaggio troppo lungo (max 2000 caratteri).");
+      }
+      text = Validators.cleanMessage(text);
+
       final now = DateTime.now();
       if (_lastMessageTime != null &&
           now.difference(_lastMessageTime!) < const Duration(milliseconds: 500)) {

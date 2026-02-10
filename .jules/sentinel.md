@@ -37,3 +37,8 @@
 **Vulnerability:** The `flutter_markdown` widget by default attempts to launch any URL provided in a link, including potentially dangerous schemes like `javascript:`, `file:`, or `sms:` if not explicitly handled.
 **Learning:** Rendering User/AI generated Markdown without a custom `onTapLink` handler implicitly trusts the content source, which is unsafe for an LLM-powered app where the AI might hallucinate or be tricked into outputting malicious links.
 **Prevention:** Always implement a strict `onTapLink` handler for `MarkdownBody` that validates the URL scheme (allow-list `http`/`https` only) before passing it to `url_launcher`.
+
+## 2026-05-27 - Security by UI
+**Vulnerability:** Input validation (length, sanitization) was only performed in the UI layer (`ChatScreen`), leaving the backend service (`DatabaseService`) exposed if called directly or bypassed.
+**Learning:** Security controls implemented solely in the UI are "Security Theater". The service layer must enforce invariants to protect data integrity and prevent DoS attacks regardless of the caller.
+**Prevention:** Move or duplicate critical validation logic (like message length limits and sanitization) into the service layer methods (`DatabaseService.sendMessage`) to ensure enforcement at the boundary of persistence.
