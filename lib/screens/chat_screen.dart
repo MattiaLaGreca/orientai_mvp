@@ -229,6 +229,8 @@ class _ChatScreenState extends State<ChatScreen> {
       setState(() {
         _isAiTyping = true;
       });
+      // ⚡ Bolt Optimization: Scroll once at start (post-frame) instead of on every chunk
+      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
     }
 
     try {
@@ -240,7 +242,8 @@ class _ChatScreenState extends State<ChatScreen> {
         fullResponse = await _aiService.sendMessageWithStreaming(text, (chunk) {
           if (mounted) {
             _streamedResponseNotifier.value = chunk;
-            _scrollToBottom();
+            // ⚡ Bolt Optimization: Removed redundant _scrollToBottom() call
+            // ListView(reverse: true) automatically handles content growth from bottom anchor.
           }
         });
       } else {
