@@ -1,6 +1,6 @@
 # Status Report - OrientAI
 
-**Data:** Febbraio 2026
+**Data:** 07 Febbraio 2026
 **Versione:** 1.0.0+1
 **Fase:** Pre-Launch (Release Candidate Verified)
 
@@ -28,7 +28,7 @@ Il progetto è tecnicamente pronto per la generazione della build di rilascio (R
 
 ## 🚧 Bloccanti / Da Fare (Manuale)
 Questi passaggi richiedono intervento manuale dello sviluppatore (non automatizzabile dall'AI per motivi di sicurezza/accesso):
-1.  **Keystore:** Generare il file `.jks` e popolare `key.properties` (vedi `docs/CHECKLIST_RILASCIO.md`).
+1.  **Keystore:** Generare il file `.jks` e popolare `key.properties` (vedi `MANUALE_RILASCIO.md`).
 2.  **AdMob:** Creare le unità pubblicitarie reali su AdMob Console e sostituire gli ID in `lib/services/ad_service.dart` (o dove definiti).
 3.  **Store Assets:** Caricare icona e screenshot sulla Google Play Console.
 

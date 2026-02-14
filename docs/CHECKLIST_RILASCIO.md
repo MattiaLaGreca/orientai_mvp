@@ -16,8 +16,8 @@ Questa checklist guida il processo di pubblicazione della prima versione (V1.0) 
     *   *Shot 3:* Funzionalità Premium o Active Assistant.
 
 ## ⚙️ 3. Configurazione Tecnica di Build
-*   [ ] **Keystore:** Generare il file `.jks` per la firma dell'APK/AAB. **NON committare questo file su git.**
-*   [ ] **`key.properties`:** Configurare il file per referenziare la keystore, ed escluderlo dal version control.
+*   [ ] **Keystore:** Generare il file `.jks` per la firma dell'APK/AAB (vedi `MANUALE_RILASCIO.md`). **NON committare questo file su git.**
+*   [ ] **`key.properties`:** Configurare il file per referenziare la keystore (vedi `MANUALE_RILASCIO.md`), ed escluderlo dal version control.
 *   [x] **Version Bumping:** Aggiornare `pubspec.yaml` (es. `version: 1.0.0+1`).
 *   [x] **App ID:** Verificare che `com.orientai.app` sia univoco e registrato in Firebase Console.
 *   [x] **Obfuscation:** Abilitare R8/ProGuard in `android/app/build.gradle` (`minifyEnabled true` per release).

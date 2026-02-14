@@ -53,6 +53,13 @@ Il progetto mantiene un'alta copertura di test unitari sui servizi core.
 flutter test
 ```
 
+## 📦 Rilascio
+
+Il progetto è configurato per la generazione di build Android ottimizzate (R8/ProGuard) e firmate.
+Per generare l'AAB per il Play Store, seguire le istruzioni dettagliate in:
+
+*   [📦 Manuale di Rilascio](docs/MANUALE_RILASCIO.md)
+
 ## 📂 Documentazione Utile
 
 Tutta la documentazione di progetto si trova nella cartella `docs/`:
