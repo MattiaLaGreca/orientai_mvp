@@ -47,6 +47,13 @@ class _ChatScreenState extends State<ChatScreen> {
   BannerAd? _bannerAd;
   bool _isBannerAdReady = false;
 
+  final List<String> _suggestions = [
+    "Quali facoltà scientifiche esistono?",
+    "Come prepararsi ai test d'ingresso?",
+    "Sbocchi lavorativi per Informatica?",
+    "Non so cosa scegliere, aiutami!",
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -200,6 +207,11 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  void _handleSuggestionClick(String suggestion) {
+    _controller.text = suggestion;
+    _handleSend();
+  }
+
   Future<void> _handleSend() async {
     // 🔒 Sentinel Security: Input Sanitization
     var text = _controller.text;
@@ -311,6 +323,20 @@ class _ChatScreenState extends State<ChatScreen> {
               "Non ci sono messaggi. Scrivi qualcosa per iniziare la conversazione!",
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey[500]),
+            ),
+            const SizedBox(height: 24),
+            Wrap(
+              spacing: 8.0,
+              runSpacing: 8.0,
+              alignment: WrapAlignment.center,
+              children: _suggestions.map((suggestion) {
+                return ActionChip(
+                  label: Text(suggestion),
+                  backgroundColor: Colors.indigo.shade50,
+                  labelStyle: const TextStyle(color: Colors.indigo),
+                  onPressed: () => _handleSuggestionClick(suggestion),
+                );
+              }).toList(),
             ),
           ],
         ),

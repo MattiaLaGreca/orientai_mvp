@@ -29,3 +29,7 @@
 ## 2026-03-10 - Stream Performance in Inputs
 **Learning:** Initializing streams inside `build` causes unnecessary restarts when keyboard state (setState) changes, causing UI jank.
 **Action:** Always initialize `Stream` objects in `initState` to ensure input interactions (typing/clearing) remain 60fps smooth.
+
+## 2026-03-12 - Empty State Guidance
+**Learning:** Empty states in conversational interfaces can lead to "blank page syndrome" where users hesitate to start.
+**Action:** Always provide contextual suggestion chips (ActionChips) in empty states to lower the barrier to entry and guide user intent.
