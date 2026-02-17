@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../utils/custom_exceptions.dart';
 import '../utils/secure_logger.dart';
+import '../utils/validators.dart';
 
 class DatabaseService {
   final FirebaseFirestore _db;
@@ -185,6 +186,17 @@ class DatabaseService {
             "Stai inviando messaggi troppo velocemente. Attendi un attimo.");
       }
       _lastMessageTime = now;
+
+      // 🔒 Sentinel Security: Input Validation
+      if (text.length > 2000) {
+        throw OrientAIDataException("Messaggio troppo lungo (max 2000 caratteri).");
+      }
+
+      text = Validators.cleanMessage(text);
+
+      if (text.isEmpty) {
+        throw OrientAIDataException("Il messaggio non può essere vuoto.");
+      }
     }
 
     try {
