@@ -229,6 +229,8 @@ class _ChatScreenState extends State<ChatScreen> {
       setState(() {
         _isAiTyping = true;
       });
+      // ⚡ Bolt Optimization: Scroll to bottom only once at start, not on every chunk
+      _scrollToBottom();
     }
 
     try {
@@ -240,7 +242,7 @@ class _ChatScreenState extends State<ChatScreen> {
         fullResponse = await _aiService.sendMessageWithStreaming(text, (chunk) {
           if (mounted) {
             _streamedResponseNotifier.value = chunk;
-            _scrollToBottom();
+            // ⚡ Bolt Optimization: Removed redundant _scrollToBottom() to prevent animation jank
           }
         });
       } else {
