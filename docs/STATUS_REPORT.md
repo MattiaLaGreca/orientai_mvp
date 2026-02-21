@@ -14,6 +14,8 @@ Il progetto è tecnicamente pronto per la generazione della build di rilascio (R
     *   Implementata whitelist URL (`http`/`https`) per prevenire XSS via Markdown links.
     *   Aggiunti Unit Tests specifici per la sicurezza URL.
 *   **Performance:**
+    *   **Latency:** Scrittura concorrente DB/AI (risposta immediata).
+    *   **UX:** Aggiornamenti ottimistici UI (0ms feedback).
     *   Ottimizzazione rendering Chat (Caching MarkdownStyleSheet).
     *   Inizializzazione ottimizzata degli Stream (evita rebuild non necessari).
 *   **Refactoring Core:** Migliorata la testabilità dei servizi (`OrientAIService`, `DatabaseService`) con Dependency Injection.

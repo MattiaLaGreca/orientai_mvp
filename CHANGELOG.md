@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **Performance:**
+  - Implemented optimistic UI updates in ChatScreen for instant user feedback.
+  - Optimized message persistence with concurrent AI request and database writes.
   - Optimized Chat Screen rendering with cached Markdown stylesheets.
   - Improved Stream initialization to prevent redundant rebuilds.
 - **Refactoring:**
