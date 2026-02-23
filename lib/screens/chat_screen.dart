@@ -312,9 +312,33 @@ class _ChatScreenState extends State<ChatScreen> {
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey[500]),
             ),
+            const SizedBox(height: 24),
+            Wrap(
+              spacing: 8.0,
+              runSpacing: 8.0,
+              alignment: WrapAlignment.center,
+              children: [
+                _buildSuggestionChip("Come scelgo l'università?"),
+                _buildSuggestionChip("Sbocchi di Informatica"),
+                _buildSuggestionChip("Triennale vs Magistrale"),
+              ],
+            ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildSuggestionChip(String label) {
+    final themeColor = widget.isPremium ? Colors.black87 : Colors.indigo;
+    return ActionChip(
+      label: Text(label),
+      backgroundColor: themeColor.withValues(alpha: 0.1),
+      labelStyle: TextStyle(color: themeColor, fontWeight: FontWeight.bold),
+      onPressed: () {
+        _controller.text = label;
+        _handleSend();
+      },
     );
   }
 

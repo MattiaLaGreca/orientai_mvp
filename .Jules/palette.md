@@ -29,3 +29,7 @@
 ## 2026-03-10 - Stream Performance in Inputs
 **Learning:** Initializing streams inside `build` causes unnecessary restarts when keyboard state (setState) changes, causing UI jank.
 **Action:** Always initialize `Stream` objects in `initState` to ensure input interactions (typing/clearing) remain 60fps smooth.
+
+## 2026-03-15 - Chat Conversation Starters
+**Learning:** Users often face "blank page syndrome" when first entering a chat interface, unsure of what to ask.
+**Action:** Display suggestion chips in the empty state to provide immediate, clickable examples of valid interactions.
