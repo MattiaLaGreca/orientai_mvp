@@ -190,6 +190,11 @@ class _ChatScreenState extends State<ChatScreen> {
     launchUrl(Uri.parse(href), mode: LaunchMode.externalApplication).ignore();
   }
 
+  void _sendSuggestion(String text) {
+    _controller.text = text;
+    _handleSend();
+  }
+
   void _scrollToBottom() {
     if (_scrollController.hasClients) {
       _scrollController.animateTo(
@@ -311,6 +316,43 @@ class _ChatScreenState extends State<ChatScreen> {
               "Non ci sono messaggi. Scrivi qualcosa per iniziare la conversazione!",
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey[500]),
+            ),
+            const SizedBox(height: 24),
+            Wrap(
+              spacing: 8.0,
+              runSpacing: 8.0,
+              alignment: WrapAlignment.center,
+              children: [
+                ActionChip(
+                  avatar: const Icon(Icons.school_outlined,
+                      size: 16, color: Colors.indigo),
+                  label: const Text("Quali facoltà esistono?"),
+                  onPressed: () => _sendSuggestion("Quali facoltà esistono?"),
+                  backgroundColor: Colors.indigo[50],
+                  side: BorderSide.none,
+                  labelStyle: const TextStyle(color: Colors.indigo),
+                ),
+                ActionChip(
+                  avatar: const Icon(Icons.help_outline,
+                      size: 16, color: Colors.indigo),
+                  label: const Text("Come funziona l'università?"),
+                  onPressed: () =>
+                      _sendSuggestion("Come funziona l'università?"),
+                  backgroundColor: Colors.indigo[50],
+                  side: BorderSide.none,
+                  labelStyle: const TextStyle(color: Colors.indigo),
+                ),
+                ActionChip(
+                  avatar: const Icon(Icons.lightbulb_outline,
+                      size: 16, color: Colors.indigo),
+                  label: const Text("Aiutami a scegliere"),
+                  onPressed: () =>
+                      _sendSuggestion("Aiutami a scegliere il mio percorso."),
+                  backgroundColor: Colors.indigo[50],
+                  side: BorderSide.none,
+                  labelStyle: const TextStyle(color: Colors.indigo),
+                ),
+              ],
             ),
           ],
         ),
