@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../utils/custom_exceptions.dart';
 import '../utils/secure_logger.dart';
+import '../utils/validators.dart';
 
 class DatabaseService {
   final FirebaseFirestore _db;
@@ -175,6 +176,21 @@ class DatabaseService {
   Future<void> sendMessage(String text, bool isUser) async {
     final user = _auth.currentUser;
     if (user == null) return;
+
+    // 🔒 Sentinel Security: Input Validation & Sanitization
+    // 1. Sanitize input (remove control characters & trim)
+    text = Validators.cleanMessage(text);
+
+    // 2. Reject empty messages (after sanitization)
+    if (text.isEmpty) {
+      throw OrientAIDataException("Il messaggio non può essere vuoto.");
+    }
+
+    // 3. Enforce Max Length (DoS protection)
+    if (text.length > 2000) {
+      throw OrientAIDataException(
+          "Messaggio troppo lungo (max 2000 caratteri).");
+    }
 
     // 🔒 Sentinel Security: Rate Limiting
     if (isUser) {
