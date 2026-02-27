@@ -247,7 +247,8 @@ class DatabaseService {
         query = query.where('createdAt', isGreaterThan: Timestamp.fromDate(since));
       }
 
-      final snapshot = await query.get();
+      // ⚡ Bolt Optimization: Limit history to 50 messages to prevent unbounded latency
+      final snapshot = await query.limit(50).get();
 
       // ⚡ Bolt Optimization: Fire-and-forget write to avoid blocking the UI read
       updateSessionStart().ignore();
