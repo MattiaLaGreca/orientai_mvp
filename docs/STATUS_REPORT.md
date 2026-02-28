@@ -13,9 +13,15 @@ Il progetto è tecnicamente pronto per la generazione della build di rilascio (R
     *   Implementata `Validators.cleanMessage` per rimuovere caratteri di controllo invisibili.
     *   Implementata whitelist URL (`http`/`https`) per prevenire XSS via Markdown links.
     *   Aggiunti Unit Tests specifici per la sicurezza URL.
+    *   Manifest Android aggiornato con esplicita dichiarazione di `INTERNET`, `usesCleartextTraffic="false"`, e tag `<queries>` per `http`/`https`.
 *   **Performance:**
     *   Ottimizzazione rendering Chat (Caching MarkdownStyleSheet).
     *   Inizializzazione ottimizzata degli Stream (evita rebuild non necessari).
+    *   Scritture concorrenti per ottimizzare la latenza (richieste AI e salvataggio DB in parallelo).
+    *   Operazioni asincrone (fire-and-forget) per la lettura della history.
+    *   Interfaccia utente ottimistica in `ChatScreen` con aggiornamenti immediati.
+    *   Ottimizzazione della performance di rendering streaming AI usando `ListView(reverse: true)`.
+    *   Eliminazione batch ottimizzata delle chat con `limit(500)`.
 *   **Refactoring Core:** Migliorata la testabilità dei servizi (`OrientAIService`, `DatabaseService`) con Dependency Injection.
 *   **Robustezza:** Implementata gestione errori utente (`_showError`) e logging sicuro (`SecureLogger`) per evitare leak di PII.
 *   **Stabilità Build:** Ripristinato ambiente di CI/Test con gestione sicura dei segreti (`lib/secrets.dart`).
