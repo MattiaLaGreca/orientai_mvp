@@ -462,6 +462,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         child: MarkdownBody(
                           data: data['text'] ?? '',
                           styleSheet: isUser ? _userStyleSheet : _aiStyleSheet,
+                          onTapLink: _handleLinkTap,
                         ),
                       ),
                     );
