@@ -33,3 +33,7 @@
 ## 2026-03-22 - Chat Empty States
 **Learning:** Users often experience "writer's block" when facing a blank chat screen without guidance.
 **Action:** Provide contextual "suggestion chips" in the empty state to help users start the conversation with one tap.
+
+## 2026-03-30 - Interactive Rendering Consistency
+**Learning:** We often add accessibility and interaction handlers (like `onTapLink`) to the "active" or "in-progress" version of a component (like a streaming AI response), but forget to add them to the "static" or "historical" version of the same component (like past messages in the chat list). This breaks the expected interaction model for users reviewing past content.
+**Action:** Always ensure that static/historical rendered components have the same interactive capabilities (link tapping, copy-paste, accessibility labels) as their active counterparts.
