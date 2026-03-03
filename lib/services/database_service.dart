@@ -241,7 +241,8 @@ class DatabaseService {
           .collection('users')
           .doc(user.uid)
           .collection('messages')
-          .orderBy('createdAt', descending: true);
+          .orderBy('createdAt', descending: true)
+          .limit(50); // 🔒 Sentinel: Prevent unbounded history loading
 
       if (since != null) {
         query = query.where('createdAt', isGreaterThan: Timestamp.fromDate(since));
