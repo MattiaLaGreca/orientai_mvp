@@ -1,26 +1,3 @@
-## 2026-03-20 - [Fire-and-Forget Pattern in Dart]
-**Learning:** Removing `await` from non-critical blocking calls (like stats logging or timestamp updates) significantly improves perceived latency. However, to satisfy linter rules (`unawaited_futures`), use `.ignore()` (Dart 2.15+) or `unawaited(...)` from `dart:async`. Crucially, ensure the unawaited future handles its own exceptions internally to avoid unhandled async errors.
-**Action:** When optimizing blocking chains, look for side-effects that don't influence the return value and can be safely unawaited. Always verify internal error handling of the unawaited function.
-
-## 2026-03-20 - [Optimizing Redundant AI Calls]
-**Learning:** In conversational AI apps, "summarization" on initialization is expensive (latency + tokens). If the user hasn't sent new messages since the last session, the previous summary is still valid. Detecting this state (empty new messages list) allows skipping the API call entirely.
-**Action:** Always check if the "delta" of new data is empty before triggering expensive re-processing or AI summarization steps. Reuse cached/stored results whenever possible.
-## 2026-03-24 - [Regex Compilation in Hot Paths]
-**Learning:** Input validation methods (sanitization/security) are called frequently. Inline `RegExp` instantiation causes unnecessary recompilation overhead.
-**Action:** Always extract `RegExp` to `static final` constants in utility classes like `Validators`.
-
-## 2026-03-25 - [Flutter ListView Builder Allocations]
-**Learning:** Instantiating complex objects (like `MarkdownStyleSheet`) inside `ListView.builder`'s `itemBuilder` causes unnecessary object allocation and garbage collection pressure on every scroll frame.
-**Action:** Pre-calculate or memoize immutable style configurations outside the `itemBuilder` (e.g., in `build` or `initState`) and reuse the instance.
-
-## 2026-03-25 - [Parallelizing Dependent Operations]
-**Learning:** In chat interfaces, waiting for the user message to be persisted (DB) before triggering the AI response introduces unnecessary latency.
-**Action:** Use "Optimistic UI" to update the view immediately, then run the DB write and AI request in parallel `Future`s. Await the DB write only when strict data consistency/ordering is required (e.g., before saving the AI response).
-
-## 2026-03-25 - [Input Latency & Global SetState]
-**Learning:** Using `setState` to update a single boolean flag (like `_showClearButton`) triggers a rebuild of the entire Widget tree. When attached to a text listener, this rebuilds the UI on every keystroke, causing jank on low-end devices.
-**Action:** Use `ValueNotifier<bool>` and `ValueListenableBuilder` to isolate updates to only the specific widget that needs to change (e.g., the suffix icon), preventing the expensive `ListView` from rebuilding.
-
-## 2026-03-27 - [Scroll Jank in Streaming Interfaces]
-**Learning:** In a `ListView(reverse: true)`, calling `scrollController.animateTo(0, ...)` on every received text chunk (e.g., from an LLM stream) is performance-heavy (hundreds of animation triggers) and redundant. Since the list is anchored at the bottom (index 0), growing content naturally pushes upwards while keeping the bottom visible.
-**Action:** Remove explicit scroll calls inside high-frequency streaming loops. Ensure a single scroll-to-bottom call is made when the stream *starts*, using `WidgetsBinding.instance.addPostFrameCallback` to handle any state transitions (e.g., empty state -> list view).
+## 2024-03-06 - [Bounded Reads & Collection Allocation]
+**Learning:** Found a critical performance bottleneck in how chat history was loaded for AI context. The `getChatHistoryForAI` function retrieved *all* historical messages, risking excessive memory consumption (DoS) and excessive Firestore read costs (DoW). Furthermore, mapping over `.reversed` created unnecessary intermediate iterables in Dart.
+**Action:** Always apply an upper bound (e.g., `.limit()`) when fetching historical user-generated content for AI context. When transforming lists in Dart, especially from Firestore query results, prefer pre-allocating an array with `List.generate(..., growable: false)` with manual index backward iteration instead of chaining `.reversed.map(...).toList()` to eliminate intermediate allocation overhead.
