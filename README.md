@@ -33,7 +33,7 @@ Creare il file `lib/secrets.dart` e inserire la propria chiave Gemini:
 
 ```dart
 // lib/secrets.dart
-const String GEMINI_API_KEY = "LA_TUA_CHIAVE_GEMINI_QUI";
+const String geminiApiKey = "LA_TUA_CHIAVE_GEMINI_QUI";
 ```
 
 > **Nota:** Per eseguire i test in CI/CD, viene generato un file dummy automaticamente.
