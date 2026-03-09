@@ -33,3 +33,7 @@
 ## 2026-03-22 - Chat Empty States
 **Learning:** Users often experience "writer's block" when facing a blank chat screen without guidance.
 **Action:** Provide contextual "suggestion chips" in the empty state to help users start the conversation with one tap.
+
+## 2026-03-30 - Contextual Button States
+**Learning:** Users may become confused or frustrated if primary action buttons (like the chat "Send" button) appear clickable when no input is provided, leading to silent failures or unexpected behavior.
+**Action:** Always visually disable action buttons (`onPressed: null` in Flutter) and input submission callbacks (`onSubmitted`) when their required conditions (e.g., empty input text) are not met.

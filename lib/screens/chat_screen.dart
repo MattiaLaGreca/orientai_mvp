@@ -112,43 +112,42 @@ class _ChatScreenState extends State<ChatScreen> {
         _dbService.getSummary(),
       ]);
 
-    List<Map<String, dynamic>> newMessages =
-        results[0] as List<Map<String, dynamic>>;
-    String previousSummary = results[1] as String;
+      List<Map<String, dynamic>> newMessages =
+          results[0] as List<Map<String, dynamic>>;
+      String previousSummary = results[1] as String;
 
-    String promptDetails =
-        "Interessi: ${widget.interests}; Frequenta: ${widget.schoolType}";
+      String promptDetails =
+          "Interessi: ${widget.interests}; Frequenta: ${widget.schoolType}";
 
-    _aiService.init(widget.studentName, promptDetails, widget.isPremium);
+      _aiService.init(widget.studentName, promptDetails, widget.isPremium);
 
-    String summary;
-    bool shouldSaveSummary = true;
+      String summary;
+      bool shouldSaveSummary = true;
 
-    // ⚡ Bolt Optimization: Skip redundant summarization if no new messages
-    if (newMessages.isEmpty && previousSummary.isNotEmpty) {
-      // Strip prefix to reuse content
-      summary = previousSummary.replaceFirst("Sommario Chat:\n", "");
-      shouldSaveSummary = false;
-      SecureLogger.log(
-          "ChatScreen", "Optimized: Skipped summarization (No new messages)");
-    } else {
-      List<Map<String, dynamic>> chatHistory = newMessages;
-      if (previousSummary.isNotEmpty) {
-        chatHistory.insert(0, {
-          'role': 'system',
-          'content': previousSummary,
-        });
+      // ⚡ Bolt Optimization: Skip redundant summarization if no new messages
+      if (newMessages.isEmpty && previousSummary.isNotEmpty) {
+        // Strip prefix to reuse content
+        summary = previousSummary.replaceFirst("Sommario Chat:\n", "");
+        shouldSaveSummary = false;
+        SecureLogger.log(
+          "ChatScreen",
+          "Optimized: Skipped summarization (No new messages)",
+        );
+      } else {
+        List<Map<String, dynamic>> chatHistory = newMessages;
+        if (previousSummary.isNotEmpty) {
+          chatHistory.insert(0, {'role': 'system', 'content': previousSummary});
+        }
+        summary = await _aiService.summarizeChat(widget.isPremium, chatHistory);
+        SecureLogger.log("ChatScreen", "Sommario Iniziale: $summary");
       }
-      summary = await _aiService.summarizeChat(widget.isPremium, chatHistory);
-      SecureLogger.log("ChatScreen", "Sommario Iniziale: $summary");
-    }
 
-    final aiResults = await Future.wait([
-      _aiService.sendMessage(summary),
-      shouldSaveSummary
-          ? _dbService.saveSummary("Sommario Chat:\n$summary")
-          : Future.value(),
-    ]);
+      final aiResults = await Future.wait([
+        _aiService.sendMessage(summary),
+        shouldSaveSummary
+            ? _dbService.saveSummary("Sommario Chat:\n$summary")
+            : Future.value(),
+      ]);
 
       fullResponse = aiResults[0] as String;
       await _dbService.sendMessage(fullResponse, false);
@@ -177,7 +176,9 @@ class _ChatScreenState extends State<ChatScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Link bloccato per sicurezza (protocollo non supportato)."),
+            content: Text(
+              "Link bloccato per sicurezza (protocollo non supportato).",
+            ),
             backgroundColor: Colors.orange,
             behavior: SnackBarBehavior.floating,
           ),
@@ -264,9 +265,9 @@ class _ChatScreenState extends State<ChatScreen> {
     } catch (e) {
       SecureLogger.log("ChatScreen", "Send Error: $e");
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Errore durante l'invio: $e")),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Errore durante l'invio: $e")));
       }
     } finally {
       if (mounted) {
@@ -327,8 +328,11 @@ class _ChatScreenState extends State<ChatScreen> {
               alignment: WrapAlignment.center,
               children: [
                 ActionChip(
-                  avatar: const Icon(Icons.school_outlined,
-                      size: 16, color: Colors.indigo),
+                  avatar: const Icon(
+                    Icons.school_outlined,
+                    size: 16,
+                    color: Colors.indigo,
+                  ),
                   label: const Text("Quali facoltà esistono?"),
                   onPressed: () => _sendSuggestion("Quali facoltà esistono?"),
                   backgroundColor: Colors.indigo[50],
@@ -336,8 +340,11 @@ class _ChatScreenState extends State<ChatScreen> {
                   labelStyle: const TextStyle(color: Colors.indigo),
                 ),
                 ActionChip(
-                  avatar: const Icon(Icons.help_outline,
-                      size: 16, color: Colors.indigo),
+                  avatar: const Icon(
+                    Icons.help_outline,
+                    size: 16,
+                    color: Colors.indigo,
+                  ),
                   label: const Text("Come funziona l'università?"),
                   onPressed: () =>
                       _sendSuggestion("Come funziona l'università?"),
@@ -346,8 +353,11 @@ class _ChatScreenState extends State<ChatScreen> {
                   labelStyle: const TextStyle(color: Colors.indigo),
                 ),
                 ActionChip(
-                  avatar: const Icon(Icons.lightbulb_outline,
-                      size: 16, color: Colors.indigo),
+                  avatar: const Icon(
+                    Icons.lightbulb_outline,
+                    size: 16,
+                    color: Colors.indigo,
+                  ),
                   label: const Text("Aiutami a scegliere"),
                   onPressed: () =>
                       _sendSuggestion("Aiutami a scegliere il mio percorso."),
@@ -473,13 +483,13 @@ class _ChatScreenState extends State<ChatScreen> {
           Container(
             padding: const EdgeInsets.all(8),
             color: Colors.white,
-            child: Row(
-              children: [
-                Expanded(
-                  child: ValueListenableBuilder<bool>(
-                    valueListenable: _showClearButtonNotifier,
-                    builder: (context, showClearButton, child) {
-                      return TextField(
+            child: ValueListenableBuilder<bool>(
+              valueListenable: _showClearButtonNotifier,
+              builder: (context, hasText, child) {
+                return Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
                         controller: _controller,
                         minLines: 1,
                         maxLines: 4,
@@ -492,7 +502,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(25),
                           ),
-                          suffixIcon: showClearButton
+                          suffixIcon: hasText
                               ? IconButton(
                                   icon: const Icon(Icons.clear),
                                   onPressed: () {
@@ -502,18 +512,19 @@ class _ChatScreenState extends State<ChatScreen> {
                                 )
                               : null,
                         ),
-                        onSubmitted: (_) => _isAiTyping ? null : _handleSend(),
-                      );
-                    },
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.send),
-                  onPressed: _isAiTyping ? null : _handleSend,
-                  color: themeColor,
-                  tooltip: "Invia messaggio",
-                ),
-              ],
+                        onSubmitted: (_) =>
+                            _isAiTyping || !hasText ? null : _handleSend(),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.send),
+                      onPressed: _isAiTyping || !hasText ? null : _handleSend,
+                      color: themeColor,
+                      tooltip: "Invia messaggio",
+                    ),
+                  ],
+                );
+              },
             ),
           ),
           if (_isBannerAdReady && _bannerAd != null)
