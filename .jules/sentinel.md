@@ -42,3 +42,8 @@
 **Vulnerability:** Input validation (length, sanitization) was only performed in the UI layer (`ChatScreen`), leaving the backend service (`DatabaseService`) exposed if called directly or bypassed.
 **Learning:** Security controls implemented solely in the UI are "Security Theater". The service layer must enforce invariants to protect data integrity and prevent DoS attacks regardless of the caller.
 **Prevention:** Move or duplicate critical validation logic (like message length limits and sanitization) into the service layer methods (`DatabaseService.sendMessage`) to ensure enforcement at the boundary of persistence.
+
+## 2026-05-28 - Missing Service-Layer Validation for Profile Update
+**Vulnerability:** The `DatabaseService.saveUserProfile` method lacked input validation, blindly writing `name` and `interests` to Firestore. While the UI (`ProfileScreen`) performed validation, this could be bypassed if the service was called directly or if another entry point was created in the future.
+**Learning:** Security by UI is insufficient. Core service layers that persist data to the database must enforce validation as a primary defense-in-depth measure to prevent data corruption or injection (like Prompt Injection via malformed names).
+**Prevention:** Always implement explicit input validation in the backend/service layer, throwing typed exceptions (e.g., `OrientAIDataException`) when invariants are violated, regardless of any upstream UI validation.
