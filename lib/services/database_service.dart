@@ -252,13 +252,20 @@ class DatabaseService {
       // ⚡ Bolt Optimization: Fire-and-forget write to avoid blocking the UI read
       updateSessionStart().ignore();
 
-      return snapshot.docs.reversed.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        return {
-          'role': (data['isUser'] ?? false) ? 'user' : 'ai',
-          'content': data['text'] ?? '',
-        };
-      }).toList();
+      // ⚡ Bolt Optimization: Use List.generate for memory efficiency
+      // Pre-allocates exact size and avoids intermediate iterable objects
+      return List.generate(
+        snapshot.docs.length,
+        (index) {
+          final doc = snapshot.docs[snapshot.docs.length - 1 - index];
+          final data = doc.data() as Map<String, dynamic>;
+          return {
+            'role': (data['isUser'] ?? false) ? 'user' : 'ai',
+            'content': data['text'] ?? '',
+          };
+        },
+        growable: false,
+      );
     } catch (e) {
       SecureLogger.log("GetChatHistoryForAI Error", e);
       // Invece di crashare, restituiamo una lista vuota così l'AI parte senza contesto ma funziona
