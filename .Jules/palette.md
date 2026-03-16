@@ -33,3 +33,7 @@
 ## 2026-03-22 - Chat Empty States
 **Learning:** Users often experience "writer's block" when facing a blank chat screen without guidance.
 **Action:** Provide contextual "suggestion chips" in the empty state to help users start the conversation with one tap.
+
+## 2026-04-15 - Disabled Action Feedback
+**Learning:** Action buttons without clear visual disabled states and callbacks that fail silently lead to confusion and perceived brokenness.
+**Action:** Always visually and functionally disable primary action buttons (like chat 'Send' buttons) and input submission callbacks when required conditions are not met.
