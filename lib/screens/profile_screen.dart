@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../utils/validators.dart';
-import '../utils/custom_exceptions.dart';
 import '../services/database_service.dart';
 
 class ProfileScreen extends StatefulWidget {
