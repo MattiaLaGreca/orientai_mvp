@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../utils/validators.dart';
+import '../utils/custom_exceptions.dart';
 import '../services/database_service.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -66,10 +67,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
     } catch (e) {
       if (mounted) {
-        // 🔒 Sentinel Security: Prevent internal error leakage
-        final errorMessage = e is OrientAIException ? e.message : 'Si è verificato un errore imprevisto.';
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(errorMessage)),
+          SnackBar(content: Text('Errore: $e')),
         );
       }
     } finally {
@@ -172,10 +171,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         }
       } catch (e) {
         if (mounted) {
-          // 🔒 Sentinel Security: Prevent internal error leakage
-          final errorMessage = e is OrientAIException ? e.message : 'Si è verificato un errore imprevisto.';
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
+            SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
           );
           setState(() => _isLoading = false);
         }

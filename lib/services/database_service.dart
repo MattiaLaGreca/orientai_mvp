@@ -99,17 +99,6 @@ class DatabaseService {
     final user = _auth.currentUser;
     if (user == null) return;
 
-    // 🔒 Sentinel Security: Defense-in-depth UI validation bypass prevention
-    final nameError = Validators.validateName(name);
-    if (nameError != null) {
-      throw OrientAIDataException(nameError);
-    }
-
-    final interestsError = Validators.validateInterests(interests);
-    if (interestsError != null) {
-      throw OrientAIDataException(interestsError);
-    }
-
     try {
       await _db.collection('users').doc(user.uid).set({
         'name': name,
