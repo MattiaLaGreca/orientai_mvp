@@ -66,8 +66,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
     } catch (e) {
       if (mounted) {
+        // 🔒 Sentinel Security: Prevent internal error leakage
+        final errorMessage = e is OrientAIException ? e.message : 'Si è verificato un errore imprevisto.';
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Errore: $e')),
+          SnackBar(content: Text(errorMessage)),
         );
       }
     } finally {
@@ -170,8 +172,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         }
       } catch (e) {
         if (mounted) {
+          // 🔒 Sentinel Security: Prevent internal error leakage
+          final errorMessage = e is OrientAIException ? e.message : 'Si è verificato un errore imprevisto.';
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+            SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
           );
           setState(() => _isLoading = false);
         }
