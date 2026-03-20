@@ -237,11 +237,13 @@ class DatabaseService {
     try {
       DateTime? since = await getLastSessionStart();
 
+      // ⚡ Bolt Optimization: Added .limit(100) to prevent unbounded reads and memory exhaustion
       Query query = _db
           .collection('users')
           .doc(user.uid)
           .collection('messages')
-          .orderBy('createdAt', descending: true);
+          .orderBy('createdAt', descending: true)
+          .limit(100);
 
       if (since != null) {
         query = query.where('createdAt', isGreaterThan: Timestamp.fromDate(since));

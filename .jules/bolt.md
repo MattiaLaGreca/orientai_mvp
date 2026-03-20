@@ -24,3 +24,7 @@
 ## 2026-03-27 - [Scroll Jank in Streaming Interfaces]
 **Learning:** In a `ListView(reverse: true)`, calling `scrollController.animateTo(0, ...)` on every received text chunk (e.g., from an LLM stream) is performance-heavy (hundreds of animation triggers) and redundant. Since the list is anchored at the bottom (index 0), growing content naturally pushes upwards while keeping the bottom visible.
 **Action:** Remove explicit scroll calls inside high-frequency streaming loops. Ensure a single scroll-to-bottom call is made when the stream *starts*, using `WidgetsBinding.instance.addPostFrameCallback` to handle any state transitions (e.g., empty state -> list view).
+
+## 2026-03-30 - [Unbounded DB Queries for AI Context]
+**Learning:** Retrieving user-generated content (like chat history) for AI context without a hard limit can lead to Denial of Service (memory exhaustion on the client) and Denial of Wallet (excessive database reads and token consumption). Even if filtered by time (`where('createdAt', ...)`), a sudden spike in messages could cause performance degradation.
+**Action:** Always append a `.limit()` clause to open-ended queries fetching data for AI context, ensuring a predictable upper bound on memory and database operations.
