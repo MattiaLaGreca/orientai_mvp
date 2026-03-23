@@ -33,3 +33,7 @@
 ## 2026-03-22 - Chat Empty States
 **Learning:** Users often experience "writer's block" when facing a blank chat screen without guidance.
 **Action:** Provide contextual "suggestion chips" in the empty state to help users start the conversation with one tap.
+
+## 2026-03-23 - Interactive Element Disabled States
+**Learning:** Users can be confused when primary action buttons (like 'Send') appear active but do nothing because required conditions (like non-empty text) are unmet.
+**Action:** Wrap related input controls in a single reactive listener (e.g., `ValueListenableBuilder`) to comprehensively disable and visually update (e.g., set to grey) both the action button and submission callbacks when input is empty.
