@@ -42,3 +42,8 @@
 **Vulnerability:** Input validation (length, sanitization) was only performed in the UI layer (`ChatScreen`), leaving the backend service (`DatabaseService`) exposed if called directly or bypassed.
 **Learning:** Security controls implemented solely in the UI are "Security Theater". The service layer must enforce invariants to protect data integrity and prevent DoS attacks regardless of the caller.
 **Prevention:** Move or duplicate critical validation logic (like message length limits and sanitization) into the service layer methods (`DatabaseService.sendMessage`) to ensure enforcement at the boundary of persistence.
+
+## 2026-05-28 - Unbounded Database Query in AI Context Retrieval
+**Vulnerability:** `DatabaseService.getChatHistoryForAI` fetched all chat messages since the session start without a `.limit()` constraint.
+**Learning:** Database queries retrieving user-generated content for AI context must always implement a hard upper bound. Failure to do so exposes the system to Denial of Service via memory exhaustion and Denial of Wallet through excessive token consumption if a user inputs an unusually large volume of text in a single session.
+**Prevention:** Enforce hard limits (`.limit()`) on all database queries designed to feed data into the AI Context to maintain performance and cap operational costs.

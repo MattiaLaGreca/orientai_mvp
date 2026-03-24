@@ -247,6 +247,10 @@ class DatabaseService {
         query = query.where('createdAt', isGreaterThan: Timestamp.fromDate(since));
       }
 
+      // 🔒 Sentinel Security: Prevent Denial of Service (memory exhaustion) and
+      // Denial of Wallet (excessive token usage) by hard-limiting AI context retrieval.
+      query = query.limit(100);
+
       final snapshot = await query.get();
 
       // ⚡ Bolt Optimization: Fire-and-forget write to avoid blocking the UI read
