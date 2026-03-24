@@ -43,4 +43,21 @@ void main() {
     // We assert 10 to CONFIRM the bug is fixed.
     expect(snapshot.docs.length, 10, reason: "limit(10) should be applied");
   });
+
+  test('getChatHistoryForAI limits to 100 messages to prevent memory/token exhaustion', () async {
+    final messagesRef = db.collection('users').doc(user.uid).collection('messages');
+
+    // Add 105 messages
+    for (int i = 0; i < 105; i++) {
+      await messagesRef.add({
+        'text': 'Message $i',
+        'isUser': true,
+        'createdAt': DateTime.now().add(Duration(minutes: i)),
+      });
+    }
+
+    final history = await service.getChatHistoryForAI(true);
+
+    expect(history.length, 100, reason: "limit(100) should be applied to AI context retrieval");
+  });
 }
