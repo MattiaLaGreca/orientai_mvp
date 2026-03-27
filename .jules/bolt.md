@@ -24,3 +24,7 @@
 ## 2026-03-27 - [Scroll Jank in Streaming Interfaces]
 **Learning:** In a `ListView(reverse: true)`, calling `scrollController.animateTo(0, ...)` on every received text chunk (e.g., from an LLM stream) is performance-heavy (hundreds of animation triggers) and redundant. Since the list is anchored at the bottom (index 0), growing content naturally pushes upwards while keeping the bottom visible.
 **Action:** Remove explicit scroll calls inside high-frequency streaming loops. Ensure a single scroll-to-bottom call is made when the stream *starts*, using `WidgetsBinding.instance.addPostFrameCallback` to handle any state transitions (e.g., empty state -> list view).
+
+## 2026-03-27 - [Firestore Query Limits & Iterable Allocations]
+**Learning:** Database queries retrieving user-generated content for AI context must always implement a hard upper bound (e.g., `.limit(100)`) to prevent Denial of Service (memory exhaustion) and Denial of Wallet (excessive token consumption). Furthermore, transforming large Firestore `QuerySnapshot`s using chained iterable methods like `.reversed.map().toList()` creates unnecessary intermediate objects, increasing garbage collection pressure.
+**Action:** Always append `.limit(N)` to unbounded queries fetching dynamic user data. Use `List.generate(count, ..., growable: false)` with manual backward indexing to directly populate a fixed-size list instead of chaining iterables.
