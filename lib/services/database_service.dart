@@ -237,11 +237,13 @@ class DatabaseService {
     try {
       DateTime? since = await getLastSessionStart();
 
+      // ⚡ Bolt Optimization: Add hard limit to prevent unbounded reads and memory exhaustion
       Query query = _db
           .collection('users')
           .doc(user.uid)
           .collection('messages')
-          .orderBy('createdAt', descending: true);
+          .orderBy('createdAt', descending: true)
+          .limit(100);
 
       if (since != null) {
         query = query.where('createdAt', isGreaterThan: Timestamp.fromDate(since));
@@ -252,13 +254,16 @@ class DatabaseService {
       // ⚡ Bolt Optimization: Fire-and-forget write to avoid blocking the UI read
       updateSessionStart().ignore();
 
-      return snapshot.docs.reversed.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
+      // ⚡ Bolt Optimization: Prevent intermediate Iterable allocations via List.generate
+      final docs = snapshot.docs;
+      final count = docs.length;
+      return List.generate(count, (index) {
+        final data = docs[count - 1 - index].data() as Map<String, dynamic>;
         return {
           'role': (data['isUser'] ?? false) ? 'user' : 'ai',
           'content': data['text'] ?? '',
         };
-      }).toList();
+      }, growable: false);
     } catch (e) {
       SecureLogger.log("GetChatHistoryForAI Error", e);
       // Invece di crashare, restituiamo una lista vuota così l'AI parte senza contesto ma funziona
