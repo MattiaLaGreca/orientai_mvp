@@ -42,3 +42,8 @@
 **Vulnerability:** Input validation (length, sanitization) was only performed in the UI layer (`ChatScreen`), leaving the backend service (`DatabaseService`) exposed if called directly or bypassed.
 **Learning:** Security controls implemented solely in the UI are "Security Theater". The service layer must enforce invariants to protect data integrity and prevent DoS attacks regardless of the caller.
 **Prevention:** Move or duplicate critical validation logic (like message length limits and sanitization) into the service layer methods (`DatabaseService.sendMessage`) to ensure enforcement at the boundary of persistence.
+
+## 2026-06-01 - UI Exception Leakage
+**Vulnerability:** Generic `catch (e)` blocks in the UI layer (`ProfileScreen`) were directly displaying raw exception strings (`e.toString()`) to the user.
+**Learning:** Exposing raw exceptions to the UI can leak sensitive internal architecture details, database paths, or stack traces, confusing users and aiding attackers.
+**Prevention:** Catch domain-specific exceptions (like `OrientAIException`) to display safe, localized error messages (`e.message`), and use generic fallback messages for all other unhandled exceptions.
