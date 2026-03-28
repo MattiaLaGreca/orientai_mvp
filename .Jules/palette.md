@@ -33,3 +33,7 @@
 ## 2026-03-22 - Chat Empty States
 **Learning:** Users often experience "writer's block" when facing a blank chat screen without guidance.
 **Action:** Provide contextual "suggestion chips" in the empty state to help users start the conversation with one tap.
+
+## 2026-04-01 - Disabled Actions Consistency
+**Learning:** Action buttons and input submission callbacks must be visually and functionally disabled when required conditions (like non-empty text input or during AI loading states) are not met.
+**Action:** Ensure the entire input row (including the send button) is wrapped in the `ValueListenableBuilder` to accurately disable form submission based on input presence and typing state.
