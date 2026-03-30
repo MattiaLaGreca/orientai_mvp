@@ -33,3 +33,7 @@
 ## 2026-03-22 - Chat Empty States
 **Learning:** Users often experience "writer's block" when facing a blank chat screen without guidance.
 **Action:** Provide contextual "suggestion chips" in the empty state to help users start the conversation with one tap.
+
+## 2026-03-30 - Dynamic Disabled States
+**Learning:** Users are confused when primary action buttons (like 'Send' in a chat) appear active but fail silently because required conditions (like non-empty input) are not met.
+**Action:** Always wrap the entire input row in a state builder (e.g., `ValueListenableBuilder`) to visually and functionally disable the action button when input is invalid or empty.
