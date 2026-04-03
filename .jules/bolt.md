@@ -24,3 +24,7 @@
 ## 2026-03-27 - [Scroll Jank in Streaming Interfaces]
 **Learning:** In a `ListView(reverse: true)`, calling `scrollController.animateTo(0, ...)` on every received text chunk (e.g., from an LLM stream) is performance-heavy (hundreds of animation triggers) and redundant. Since the list is anchored at the bottom (index 0), growing content naturally pushes upwards while keeping the bottom visible.
 **Action:** Remove explicit scroll calls inside high-frequency streaming loops. Ensure a single scroll-to-bottom call is made when the stream *starts*, using `WidgetsBinding.instance.addPostFrameCallback` to handle any state transitions (e.g., empty state -> list view).
+
+## 2026-04-03 - [Optimizing Large Iterable Chains]
+**Learning:** Chaining `.reversed.map().toList()` on large lists creates intermediate iterator objects and a dynamically resized array, increasing memory allocation overhead and garbage collection pressure, which can slow down operations in hot paths.
+**Action:** Replace chained iterables with a single `List.generate(count, ..., growable: false)` that calculates indices manually (e.g., iterating backwards). This pre-allocates exactly the required memory and avoids intermediate object creation.
