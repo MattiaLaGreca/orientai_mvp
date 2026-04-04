@@ -53,6 +53,19 @@ Il progetto mantiene un'alta copertura di test unitari sui servizi core.
 flutter test
 ```
 
+## 🛡️ Sicurezza
+
+OrientAI adotta diverse misure per garantire la sicurezza e l'integrità dei dati:
+*   **Gestione Segreti:** API keys isolate nel file locale `lib/secrets.dart` (non tracciato in git).
+*   **Sanitizzazione Input:** La funzione `Validators.cleanMessage` rimuove caratteri di controllo invisibili e messaggi malformati prima del salvataggio.
+*   **Protezione URL:** Whitelisting per bloccare schemi URL potenzialmente malevoli (es. `javascript:`).
+*   **Logging Sicuro:** La classe `SecureLogger` nasconde log critici ed evita i leak di PII in produzione.
+
+## 📦 Rilascio
+
+Per istruzioni dettagliate su come generare l'APK/AAB, configurare le chiavi di firma (Keystore) e pubblicare l'app sul Google Play Store, consultare la documentazione specifica:
+[Manuale di Rilascio](docs/MANUALE_RILASCIO.md)
+
 ## 📂 Documentazione Utile
 
 Tutta la documentazione di progetto si trova nella cartella `docs/`:
