@@ -33,3 +33,7 @@
 ## 2026-03-22 - Chat Empty States
 **Learning:** Users often experience "writer's block" when facing a blank chat screen without guidance.
 **Action:** Provide contextual "suggestion chips" in the empty state to help users start the conversation with one tap.
+
+## 2025-04-06 - Dynamic Input Disable State
+**Learning:** In Flutter, keeping the submission action (e.g., Send button) visually and functionally tightly coupled to the input state (text presence, processing state) is critical for accessibility and usability. Using a `ValueListenableBuilder` to wrap the entire row prevents full-screen rebuilds while allowing the button to react immediately and correctly visually (color updates) and functionally (`onPressed: null`) to user input and AI processing states.
+**Action:** When creating forms or chat inputs, wrap related interactive elements together in a local state listener (like `ValueListenableBuilder`) to ensure they share the same context without causing jank, preventing users from attempting invalid submissions when disabled states are appropriate.
