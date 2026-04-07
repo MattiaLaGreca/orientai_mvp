@@ -42,3 +42,8 @@
 **Vulnerability:** Input validation (length, sanitization) was only performed in the UI layer (`ChatScreen`), leaving the backend service (`DatabaseService`) exposed if called directly or bypassed.
 **Learning:** Security controls implemented solely in the UI are "Security Theater". The service layer must enforce invariants to protect data integrity and prevent DoS attacks regardless of the caller.
 **Prevention:** Move or duplicate critical validation logic (like message length limits and sanitization) into the service layer methods (`DatabaseService.sendMessage`) to ensure enforcement at the boundary of persistence.
+
+## 2026-05-28 - Unbounded Query Denial of Wallet
+**Vulnerability:** The `getChatHistoryForAI` query relied solely on a time-bound (`since` timestamp) without a hard row limit. A malicious or compromised client could generate thousands of messages in a single session, leading to unbounded Firestore reads and excessive token consumption when the history is passed to the AI.
+**Learning:** Time bounds are insufficient for bounding resource usage if the rate of creation within that time frame is not strictly guaranteed or if historical data volume is unpredictable.
+**Prevention:** Always implement a hard `.limit()` on database queries that retrieve user-generated content for AI context, ensuring a worst-case upper bound on database reads and memory/token usage.

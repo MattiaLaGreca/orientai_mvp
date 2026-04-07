@@ -247,6 +247,11 @@ class DatabaseService {
         query = query.where('createdAt', isGreaterThan: Timestamp.fromDate(since));
       }
 
+      // 🛡️ Sentinel Security: Prevent Denial of Service & Denial of Wallet
+      // Even with a time bound, a user could generate infinite messages, exhausting DB reads and AI tokens.
+      // Applying a hard limit ensures bounded resource usage per session.
+      query = query.limit(100);
+
       final snapshot = await query.get();
 
       // ⚡ Bolt Optimization: Fire-and-forget write to avoid blocking the UI read
