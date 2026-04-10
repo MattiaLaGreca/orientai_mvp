@@ -24,3 +24,11 @@
 ## 2026-03-27 - [Scroll Jank in Streaming Interfaces]
 **Learning:** In a `ListView(reverse: true)`, calling `scrollController.animateTo(0, ...)` on every received text chunk (e.g., from an LLM stream) is performance-heavy (hundreds of animation triggers) and redundant. Since the list is anchored at the bottom (index 0), growing content naturally pushes upwards while keeping the bottom visible.
 **Action:** Remove explicit scroll calls inside high-frequency streaming loops. Ensure a single scroll-to-bottom call is made when the stream *starts*, using `WidgetsBinding.instance.addPostFrameCallback` to handle any state transitions (e.g., empty state -> list view).
+
+## 2026-03-31 - [Micro-optimizations vs Functionality]
+**Learning:** Adding a hard limit (`.limit(100)`) to a database query fetching history to optimize memory usage fundamentally changes the application's behavior and can lead to bugs (e.g., truncating AI context). Furthermore, refactoring idiomatic `.reversed.map(...).toList()` into a verbose `List.generate(...)` for a small, bounded list sacrifices readability for an unmeasurable performance gain.
+**Action:** Never alter business logic or introduce arbitrary constraints just to improve a performance metric unless explicitly authorized. Avoid micro-optimizations that reduce readability when the dataset size makes the performance impact negligible.
+
+## 2026-03-31 - [Flutter ListView Builder Allocations - Extended]
+**Learning:** Instantiating `BoxDecoration` (and nested objects like `BorderRadius` or `BoxShadow`) inside `ListView.builder`'s `itemBuilder` causes unnecessary object allocation and garbage collection pressure on every scroll frame, similarly to text styling objects.
+**Action:** Always pre-calculate and cache immutable styling containers (`BoxDecoration`) outside the `itemBuilder` (e.g., in `initState` or as class fields) and reuse the instances.
