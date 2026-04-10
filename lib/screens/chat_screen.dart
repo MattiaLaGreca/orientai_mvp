@@ -38,6 +38,9 @@ class _ChatScreenState extends State<ChatScreen> {
   late Stream<QuerySnapshot> _messagesStream;
   late final MarkdownStyleSheet _userStyleSheet;
   late final MarkdownStyleSheet _aiStyleSheet;
+  late final BoxDecoration _userMessageDecoration;
+  late final BoxDecoration _aiMessageDecoration;
+  late final BoxDecoration _aiTypingDecoration;
 
   bool _isAiTyping = true;
   bool _isInitializing = true;
@@ -62,6 +65,28 @@ class _ChatScreenState extends State<ChatScreen> {
     _aiStyleSheet = MarkdownStyleSheet(
       p: const TextStyle(color: Colors.black87),
       strong: TextStyle(color: themeColor, fontWeight: FontWeight.bold),
+    );
+
+    _userMessageDecoration = BoxDecoration(
+      color: themeColor,
+      borderRadius: BorderRadius.circular(12),
+      boxShadow: const [
+        BoxShadow(color: Colors.black12, blurRadius: 4),
+      ],
+    );
+
+    _aiMessageDecoration = BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      boxShadow: const [
+        BoxShadow(color: Colors.black12, blurRadius: 4),
+      ],
+    );
+
+    _aiTypingDecoration = BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: Colors.grey.shade300),
     );
 
     _initChat();
@@ -420,11 +445,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         child: Container(
                           margin: const EdgeInsets.symmetric(vertical: 4),
                           padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey.shade300),
-                          ),
+                          decoration: _aiTypingDecoration,
                           child: ValueListenableBuilder<String>(
                             valueListenable: _streamedResponseNotifier,
                             builder: (context, value, child) {
@@ -452,13 +473,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         constraints: BoxConstraints(
                           maxWidth: MediaQuery.of(context).size.width * 0.85,
                         ),
-                        decoration: BoxDecoration(
-                          color: isUser ? themeColor : Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: const [
-                            BoxShadow(color: Colors.black12, blurRadius: 4),
-                          ],
-                        ),
+                        decoration: isUser ? _userMessageDecoration : _aiMessageDecoration,
                         child: MarkdownBody(
                           data: data['text'] ?? '',
                           styleSheet: isUser ? _userStyleSheet : _aiStyleSheet,
