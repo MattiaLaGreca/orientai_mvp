@@ -16,6 +16,9 @@ Il progetto è tecnicamente pronto per la generazione della build di rilascio (R
 *   **Performance:**
     *   Ottimizzazione rendering Chat (Caching MarkdownStyleSheet).
     *   Inizializzazione ottimizzata degli Stream (evita rebuild non necessari).
+    *   Implementate scritture concorrenti.
+    *   Implementata Optimistic UI in ChatScreen.
+    *   Ottimizzazione allocazione di memoria tramite `List.generate`.
 *   **Refactoring Core:** Migliorata la testabilità dei servizi (`OrientAIService`, `DatabaseService`) con Dependency Injection.
 *   **Robustezza:** Implementata gestione errori utente (`_showError`) e logging sicuro (`SecureLogger`) per evitare leak di PII.
 *   **Stabilità Build:** Ripristinato ambiente di CI/Test con gestione sicura dei segreti (`lib/secrets.dart`).

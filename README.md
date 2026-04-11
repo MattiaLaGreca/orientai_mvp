@@ -53,13 +53,29 @@ Il progetto mantiene un'alta copertura di test unitari sui servizi core.
 flutter test
 ```
 
+## 🛡️ Sicurezza
+
+OrientAI implementa diverse misure di sicurezza per proteggere i dati degli utenti e l'integrità dell'applicazione:
+
+*   **API Key Isolation:** Le chiavi API sono isolate e non incluse nel version control.
+*   **Logging Sicuro:** Utilizzo di `SecureLogger` per evitare leak di PII e token nei log di produzione.
+*   **Input Sanitization:** Validazione rigorosa degli input utente e whitelist per URL in markdown per prevenire XSS.
+*   **Gestione Errori:** Nessuna esposizione dell'architettura interna all'utente tramite eccezioni generiche catturate e messaggi sicuri.
+
+Per ulteriori dettagli sulla sicurezza, vedere la documentazione interna e i log degli agenti (es. Sentinel).
+
+## 🚀 Rilascio
+
+Per informazioni complete sul processo di generazione della build di produzione, configurazione del Keystore, offuscamento e pubblicazione sul Play Store, fare riferimento al [Manuale di Rilascio](docs/MANUALE_RILASCIO.md).
+
 ## 📂 Documentazione Utile
 
 Tutta la documentazione di progetto si trova nella cartella `docs/`:
 
 *   [🚦 Status Report](docs/STATUS_REPORT.md): Stato corrente del progetto.
 *   [🗺️ Roadmap Tecnica](docs/ROADMAP_TECNICA.md): Pianificazione delle feature e del debito tecnico.
-*   [📦 Manuale di Rilascio](docs/MANUALE_RILASCIO.md): Guida alla generazione della build di produzione (Keystore, Obfuscation, Play Store).
+*   [✅ Checklist di Rilascio](docs/CHECKLIST_RILASCIO.md): Lista di controllo per il rilascio in produzione.
+*   [📦 Manuale di Rilascio](docs/MANUALE_RILASCIO.md): Guida alla generazione della build di produzione.
 *   [💰 Strategia di Sostenibilità](docs/STRATEGIA_SOSTENIBILITA.md): Piano finanziario e fiscale.
 
 ---
