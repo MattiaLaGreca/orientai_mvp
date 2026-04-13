@@ -33,3 +33,7 @@
 ## 2026-03-22 - Chat Empty States
 **Learning:** Users often experience "writer's block" when facing a blank chat screen without guidance.
 **Action:** Provide contextual "suggestion chips" in the empty state to help users start the conversation with one tap.
+
+## 2026-04-13 - Disabled States for Actions
+**Learning:** Users can be confused if primary action buttons (like a 'Send' button) visually appear enabled but silently fail when pressed due to unmet conditions (like empty input).
+**Action:** Always visually and functionally disable primary actions (using `onPressed: null` and updating color/style) when required conditions, such as non-empty text input, are not met.
