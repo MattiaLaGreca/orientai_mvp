@@ -42,3 +42,12 @@
 **Vulnerability:** Input validation (length, sanitization) was only performed in the UI layer (`ChatScreen`), leaving the backend service (`DatabaseService`) exposed if called directly or bypassed.
 **Learning:** Security controls implemented solely in the UI are "Security Theater". The service layer must enforce invariants to protect data integrity and prevent DoS attacks regardless of the caller.
 **Prevention:** Move or duplicate critical validation logic (like message length limits and sanitization) into the service layer methods (`DatabaseService.sendMessage`) to ensure enforcement at the boundary of persistence.
+## 2024-05-28 - Missing Backend Input Validation
+**Vulnerability:** Profiles were being saved without validating `name` and `interests` strings on the backend. This could allow users to inject arbitrary text into the database.
+**Learning:** Security must be maintained on the backend, not just the frontend UI, to prevent direct tampering with persistence layers.
+**Prevention:** Implement validation methods directly inside the corresponding database service methods.
+
+## 2024-05-28 - Link Tapping Vulnerability in Markdown
+**Vulnerability:** A `MarkdownBody` widget for history rendering did not have an `onTapLink` handler. This could allow arbitrary URLs like `javascript:` to be launched if rendered in history, while the active chat was protected.
+**Learning:** Ensure that any user-facing rendering, such as older or historical messages, has the same security protection against URL scheme injection as active responses.
+**Prevention:** Make sure `onTapLink` handlers are added wherever dynamic URLs might be rendered via markdown or other handlers.
