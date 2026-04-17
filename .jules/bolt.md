@@ -24,3 +24,7 @@
 ## 2026-03-27 - [Scroll Jank in Streaming Interfaces]
 **Learning:** In a `ListView(reverse: true)`, calling `scrollController.animateTo(0, ...)` on every received text chunk (e.g., from an LLM stream) is performance-heavy (hundreds of animation triggers) and redundant. Since the list is anchored at the bottom (index 0), growing content naturally pushes upwards while keeping the bottom visible.
 **Action:** Remove explicit scroll calls inside high-frequency streaming loops. Ensure a single scroll-to-bottom call is made when the stream *starts*, using `WidgetsBinding.instance.addPostFrameCallback` to handle any state transitions (e.g., empty state -> list view).
+
+## 2026-03-25 - [Flutter ListView Builder Allocations]
+**Learning:** Instantiating complex objects (like `MarkdownStyleSheet` and `BoxDecoration`) inside `ListView.builder`'s `itemBuilder` causes unnecessary object allocation and garbage collection pressure on every scroll frame.
+**Action:** Pre-calculate or memoize immutable style configurations outside the `itemBuilder` (e.g., in `build` or `initState`) and reuse the instance. We have extended this optimization from Markdown stylesheets to BoxDecoration objects.
