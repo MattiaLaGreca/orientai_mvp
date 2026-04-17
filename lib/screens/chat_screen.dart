@@ -36,8 +36,11 @@ class _ChatScreenState extends State<ChatScreen> {
   final DatabaseService _dbService = DatabaseService();
 
   late Stream<QuerySnapshot> _messagesStream;
-  late final MarkdownStyleSheet _userStyleSheet;
-  late final MarkdownStyleSheet _aiStyleSheet;
+  late MarkdownStyleSheet _userStyleSheet;
+  late MarkdownStyleSheet _aiStyleSheet;
+  late BoxDecoration _userMessageDecoration;
+  late BoxDecoration _aiMessageDecoration;
+  late BoxDecoration _aiTypingDecoration;
 
   bool _isAiTyping = true;
   bool _isInitializing = true;
@@ -53,16 +56,7 @@ class _ChatScreenState extends State<ChatScreen> {
     _controller.addListener(_onTextChanged);
     _messagesStream = _dbService.getMessagesStream(widget.isPremium);
 
-    // ⚡ Bolt Optimization: Pre-calculate stylesheets to avoid recreation
-    final themeColor = widget.isPremium ? Colors.black87 : Colors.indigo;
-    _userStyleSheet = MarkdownStyleSheet(
-      p: const TextStyle(color: Colors.white),
-      strong: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-    );
-    _aiStyleSheet = MarkdownStyleSheet(
-      p: const TextStyle(color: Colors.black87),
-      strong: TextStyle(color: themeColor, fontWeight: FontWeight.bold),
-    );
+    _initStyles();
 
     _initChat();
 
@@ -92,6 +86,48 @@ class _ChatScreenState extends State<ChatScreen> {
     );
 
     _bannerAd?.load();
+  }
+
+  void _initStyles() {
+    // ⚡ Bolt Optimization: Pre-calculate stylesheets and decorations to avoid recreation on every scroll frame
+    final themeColor = widget.isPremium ? Colors.black87 : Colors.indigo;
+    _userStyleSheet = MarkdownStyleSheet(
+      p: const TextStyle(color: Colors.white),
+      strong: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+    );
+    _aiStyleSheet = MarkdownStyleSheet(
+      p: const TextStyle(color: Colors.black87),
+      strong: TextStyle(color: themeColor, fontWeight: FontWeight.bold),
+    );
+
+    _userMessageDecoration = BoxDecoration(
+      color: themeColor,
+      borderRadius: BorderRadius.circular(12),
+      boxShadow: const [
+        BoxShadow(color: Colors.black12, blurRadius: 4),
+      ],
+    );
+    _aiMessageDecoration = BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      boxShadow: const [
+        BoxShadow(color: Colors.black12, blurRadius: 4),
+      ],
+    );
+    _aiTypingDecoration = BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: Colors.grey.shade300),
+    );
+  }
+
+  @override
+  void didUpdateWidget(ChatScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isPremium != widget.isPremium) {
+      _initStyles();
+      _messagesStream = _dbService.getMessagesStream(widget.isPremium);
+    }
   }
 
   @override
@@ -420,11 +456,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         child: Container(
                           margin: const EdgeInsets.symmetric(vertical: 4),
                           padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey.shade300),
-                          ),
+                          decoration: _aiTypingDecoration,
                           child: ValueListenableBuilder<String>(
                             valueListenable: _streamedResponseNotifier,
                             builder: (context, value, child) {
@@ -452,13 +484,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         constraints: BoxConstraints(
                           maxWidth: MediaQuery.of(context).size.width * 0.85,
                         ),
-                        decoration: BoxDecoration(
-                          color: isUser ? themeColor : Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: const [
-                            BoxShadow(color: Colors.black12, blurRadius: 4),
-                          ],
-                        ),
+                        decoration: isUser ? _userMessageDecoration : _aiMessageDecoration,
                         child: MarkdownBody(
                           data: data['text'] ?? '',
                           styleSheet: isUser ? _userStyleSheet : _aiStyleSheet,
