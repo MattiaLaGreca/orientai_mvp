@@ -473,13 +473,14 @@ class _ChatScreenState extends State<ChatScreen> {
           Container(
             padding: const EdgeInsets.all(8),
             color: Colors.white,
-            child: Row(
-              children: [
-                Expanded(
-                  child: ValueListenableBuilder<bool>(
-                    valueListenable: _showClearButtonNotifier,
-                    builder: (context, showClearButton, child) {
-                      return TextField(
+            child: ValueListenableBuilder<bool>(
+              valueListenable: _showClearButtonNotifier,
+              builder: (context, hasText, child) {
+                final canSend = !_isAiTyping && hasText;
+                return Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
                         controller: _controller,
                         minLines: 1,
                         maxLines: 4,
@@ -492,7 +493,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(25),
                           ),
-                          suffixIcon: showClearButton
+                          suffixIcon: hasText
                               ? IconButton(
                                   icon: const Icon(Icons.clear),
                                   onPressed: () {
@@ -502,18 +503,18 @@ class _ChatScreenState extends State<ChatScreen> {
                                 )
                               : null,
                         ),
-                        onSubmitted: (_) => _isAiTyping ? null : _handleSend(),
-                      );
-                    },
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.send),
-                  onPressed: _isAiTyping ? null : _handleSend,
-                  color: themeColor,
-                  tooltip: "Invia messaggio",
-                ),
-              ],
+                        onSubmitted: canSend ? (_) => _handleSend() : null,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.send),
+                      onPressed: canSend ? _handleSend : null,
+                      color: canSend ? themeColor : Colors.grey,
+                      tooltip: "Invia messaggio",
+                    ),
+                  ],
+                );
+              },
             ),
           ),
           if (_isBannerAdReady && _bannerAd != null)
