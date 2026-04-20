@@ -33,3 +33,7 @@
 ## 2026-03-22 - Chat Empty States
 **Learning:** Users often experience "writer's block" when facing a blank chat screen without guidance.
 **Action:** Provide contextual "suggestion chips" in the empty state to help users start the conversation with one tap.
+
+## 2026-04-20 - Dynamic Action Button State
+**Learning:** Users may not realize why pressing the send button does not work when an input is empty or the AI is still processing the previous message if there is no visual feedback.
+**Action:** Disable the submission action buttons visually and functionally (e.g., `onPressed: null`) when conditions to submit are not met.
