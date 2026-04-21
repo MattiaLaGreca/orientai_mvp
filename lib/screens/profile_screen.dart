@@ -3,6 +3,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../utils/validators.dart';
 import '../services/database_service.dart';
+import '../utils/custom_exceptions.dart';
 
 class ProfileScreen extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -64,10 +65,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
         );
         Navigator.pop(context); // Torna alla chat
       }
+    } on OrientAIException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message)),
+        );
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Errore: $e')),
+          const SnackBar(content: Text('Si è verificato un errore imprevisto.')),
         );
       }
     } finally {
@@ -93,12 +100,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     if (confirm == true) {
       setState(() => _isLoading = true);
-      await _dbService.clearChat();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Cronologia chat cancellata.')),
-        );
-        setState(() => _isLoading = false);
+      try {
+        await _dbService.clearChat();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Cronologia chat cancellata.')),
+          );
+          setState(() => _isLoading = false);
+        }
+      } on OrientAIException catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(e.message), backgroundColor: Colors.red),
+          );
+          setState(() => _isLoading = false);
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Si è verificato un errore imprevisto.'), backgroundColor: Colors.red),
+          );
+          setState(() => _isLoading = false);
+        }
       }
     }
   }
@@ -168,10 +191,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
         if (mounted) {
            Navigator.of(context).popUntil((route) => route.isFirst);
         }
+      } on OrientAIException catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(e.message), backgroundColor: Colors.red),
+          );
+          setState(() => _isLoading = false);
+        }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+            const SnackBar(content: Text('Si è verificato un errore imprevisto.'), backgroundColor: Colors.red),
           );
           setState(() => _isLoading = false);
         }
