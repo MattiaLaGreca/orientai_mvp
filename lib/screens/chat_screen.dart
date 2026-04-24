@@ -36,8 +36,11 @@ class _ChatScreenState extends State<ChatScreen> {
   final DatabaseService _dbService = DatabaseService();
 
   late Stream<QuerySnapshot> _messagesStream;
-  late final MarkdownStyleSheet _userStyleSheet;
-  late final MarkdownStyleSheet _aiStyleSheet;
+  late MarkdownStyleSheet _userStyleSheet;
+  late MarkdownStyleSheet _aiStyleSheet;
+  late BoxDecoration _userMessageDecoration;
+  late BoxDecoration _aiMessageDecoration;
+  late BoxDecoration _aiTypingDecoration;
 
   bool _isAiTyping = true;
   bool _isInitializing = true;
@@ -47,13 +50,8 @@ class _ChatScreenState extends State<ChatScreen> {
   BannerAd? _bannerAd;
   bool _isBannerAdReady = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _controller.addListener(_onTextChanged);
-    _messagesStream = _dbService.getMessagesStream(widget.isPremium);
-
-    // ⚡ Bolt Optimization: Pre-calculate stylesheets to avoid recreation
+  // ⚡ Bolt Optimization: Centralized style initialization to avoid recreating objects in build methods
+  void _initStyles() {
     final themeColor = widget.isPremium ? Colors.black87 : Colors.indigo;
     _userStyleSheet = MarkdownStyleSheet(
       p: const TextStyle(color: Colors.white),
@@ -64,11 +62,50 @@ class _ChatScreenState extends State<ChatScreen> {
       strong: TextStyle(color: themeColor, fontWeight: FontWeight.bold),
     );
 
+    _aiTypingDecoration = BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: Colors.grey.shade300),
+    );
+
+    _aiMessageDecoration = BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      boxShadow: const [
+        BoxShadow(color: Colors.black12, blurRadius: 4),
+      ],
+    );
+
+    _userMessageDecoration = BoxDecoration(
+      color: themeColor,
+      borderRadius: BorderRadius.circular(12),
+      boxShadow: const [
+        BoxShadow(color: Colors.black12, blurRadius: 4),
+      ],
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(_onTextChanged);
+    _messagesStream = _dbService.getMessagesStream(widget.isPremium);
+
+    _initStyles();
+
     _initChat();
 
     // Inizializza Ads solo se non è premium
     if (!widget.isPremium) {
       _loadBannerAd();
+    }
+  }
+
+  @override
+  void didUpdateWidget(ChatScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isPremium != widget.isPremium) {
+      _initStyles();
     }
   }
 
@@ -420,11 +457,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         child: Container(
                           margin: const EdgeInsets.symmetric(vertical: 4),
                           padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey.shade300),
-                          ),
+                          decoration: _aiTypingDecoration,
                           child: ValueListenableBuilder<String>(
                             valueListenable: _streamedResponseNotifier,
                             builder: (context, value, child) {
@@ -452,13 +485,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         constraints: BoxConstraints(
                           maxWidth: MediaQuery.of(context).size.width * 0.85,
                         ),
-                        decoration: BoxDecoration(
-                          color: isUser ? themeColor : Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: const [
-                            BoxShadow(color: Colors.black12, blurRadius: 4),
-                          ],
-                        ),
+                        decoration: isUser ? _userMessageDecoration : _aiMessageDecoration,
                         child: MarkdownBody(
                           data: data['text'] ?? '',
                           styleSheet: isUser ? _userStyleSheet : _aiStyleSheet,
