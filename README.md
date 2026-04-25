@@ -53,6 +53,18 @@ Il progetto mantiene un'alta copertura di test unitari sui servizi core.
 flutter test
 ```
 
+## 🛡️ Sicurezza (Security)
+
+Il progetto include misure di sicurezza chiave:
+*   **Gestione Segreti:** API key isolate in `lib/secrets.dart`.
+*   **Logging:** `SecureLogger` evita il leak di PII o token sensibili.
+*   **Validazione Input:** I messaggi utente sono sanitizzati per prevenire caratteri di controllo invisibili.
+*   **Protezione URL:** Whitelist rigida (`http`/`https`) implementata per bloccare schemi URL malevoli (es. `javascript:`).
+
+## 📦 Rilascio
+
+Il rilascio della V1.0 per Android è dettagliato nel manuale tecnico di rilascio. Segui il documento per generare app bundle e pubblicare su Google Play: [Manuale di Rilascio](docs/MANUALE_RILASCIO.md).
+
 ## 📂 Documentazione Utile
 
 Tutta la documentazione di progetto si trova nella cartella `docs/`:
