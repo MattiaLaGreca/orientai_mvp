@@ -42,3 +42,8 @@
 **Vulnerability:** Input validation (length, sanitization) was only performed in the UI layer (`ChatScreen`), leaving the backend service (`DatabaseService`) exposed if called directly or bypassed.
 **Learning:** Security controls implemented solely in the UI are "Security Theater". The service layer must enforce invariants to protect data integrity and prevent DoS attacks regardless of the caller.
 **Prevention:** Move or duplicate critical validation logic (like message length limits and sanitization) into the service layer methods (`DatabaseService.sendMessage`) to ensure enforcement at the boundary of persistence.
+
+## 2026-05-28 - Inconsistent Security Enforcement in UI Views
+**Vulnerability:** The `onTapLink` handler was correctly implemented for the active streaming AI response `MarkdownBody`, but was missing from the historical message `MarkdownBody`.
+**Learning:** Security controls applied to active or new content are often forgotten when rendering historical or static content. If the underlying data is the same (Markdown with potential URLs), the rendering mechanism must enforce identical security constraints, regardless of whether the content is active, streamed, or fetched from the database.
+**Prevention:** Always verify that identical UI components displaying the same type of data (e.g., Markdown bodies) apply identical security configurations (like `onTapLink` handlers) across all views and states (active vs. historical).
