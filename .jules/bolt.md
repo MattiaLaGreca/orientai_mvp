@@ -24,3 +24,6 @@
 ## 2026-03-27 - [Scroll Jank in Streaming Interfaces]
 **Learning:** In a `ListView(reverse: true)`, calling `scrollController.animateTo(0, ...)` on every received text chunk (e.g., from an LLM stream) is performance-heavy (hundreds of animation triggers) and redundant. Since the list is anchored at the bottom (index 0), growing content naturally pushes upwards while keeping the bottom visible.
 **Action:** Remove explicit scroll calls inside high-frequency streaming loops. Ensure a single scroll-to-bottom call is made when the stream *starts*, using `WidgetsBinding.instance.addPostFrameCallback` to handle any state transitions (e.g., empty state -> list view).
+## 2026-05-01 - [Pre-calculate styles and decorations]
+**Learning:** Pre-calculating complex objects like `BoxDecoration` and `MarkdownStyleSheet` and storing them in instance variables prevents redundant object creation during list building (`ListView.builder`), especially when streaming data.
+**Action:** Always extract styling configurations that do not change per item into centralized methods (`_initStyles`) and call them from `initState` and `didUpdateWidget`.
