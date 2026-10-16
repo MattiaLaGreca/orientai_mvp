@@ -33,63 +33,101 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class AuthWrapper extends StatelessWidget {
+class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final dbService = DatabaseService();
+  State<AuthWrapper> createState() => _AuthWrapperState();
+}
 
+class _AuthWrapperState extends State<AuthWrapper> {
+  final _dbService = DatabaseService();
+  late final Stream<User?> _authStateStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _authStateStream = _dbService.authStateChanges;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return StreamBuilder<User?>(
-      stream: dbService.authStateChanges,
+      stream: _authStateStream,
       builder: (context, snapshot) {
-        
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(
+              body: Center(child: CircularProgressIndicator()));
         }
 
         if (snapshot.hasData) {
-          final user = snapshot.data!;
-          
-          // --- MODIFICA REATTIVA ---
-          // Invece di chiedere i dati una volta sola (Future), ascoltiamo i cambiamenti (Stream).
-          // Usiamo direttamente Firestore qui per semplicità, ma potresti metterlo nel service.
-          return StreamBuilder<DocumentSnapshot>(
-            stream: FirebaseFirestore.instance.collection('users').doc(user.uid).snapshots(),
-            builder: (context, profileSnapshot) {
-              
-              if (profileSnapshot.connectionState == ConnectionState.waiting) {
-                return const Scaffold(body: Center(child: CircularProgressIndicator()));
-              }
-
-              // Controlliamo se il documento esiste e ha i dati necessari
-              if (profileSnapshot.hasData && profileSnapshot.data!.exists) {
-                final data = profileSnapshot.data!.data() as Map<String, dynamic>;
-                
-                // Verifica se il profilo è completo (ha il nome)
-                if (data.containsKey('name') && 
-                    data['name'] != null && 
-                    data['name'].toString().isNotEmpty) {
-                  
-                  bool isPremium = data['isPremium'] ?? false;
-                  
-                  // Se il profilo è completo, il Main mostra AUTOMATICAMENTE la Chat.
-                  return ChatScreen(
-                    studentName: data['name'],
-                    interests: data['interests'] ?? '',
-                    schoolType: data['school'] ?? '',
-                    isPremium: isPremium,
-                  );
-                }
-              }
-
-              // Se i dati mancano o il documento non esiste -> Onboarding
-              return const OnboardingScreen();
-            },
-          );
+          return _ProfileWrapper(user: snapshot.data!);
         }
 
         return const LoginScreen();
+      },
+    );
+  }
+}
+
+class _ProfileWrapper extends StatefulWidget {
+  final User user;
+  const _ProfileWrapper({required this.user});
+
+  @override
+  State<_ProfileWrapper> createState() => _ProfileWrapperState();
+}
+
+class _ProfileWrapperState extends State<_ProfileWrapper> {
+  late final Stream<DocumentSnapshot> _profileStream;
+
+  @override
+  void initState() {
+    super.initState();
+    // ⚡ Bolt Optimization: Filter stream updates to only rebuild when critical
+    // profile fields change, preventing full app rebuilds on every chat message.
+    _profileStream = FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.user.uid)
+        .snapshots()
+        .distinct((prev, curr) {
+      final p = prev.data() ?? {};
+      final c = curr.data() ?? {};
+      return p['name'] == c['name'] &&
+          p['interests'] == c['interests'] &&
+          p['school'] == c['school'] &&
+          p['isPremium'] == c['isPremium'];
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<DocumentSnapshot>(
+      stream: _profileStream,
+      builder: (context, profileSnapshot) {
+        if (profileSnapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+              body: Center(child: CircularProgressIndicator()));
+        }
+
+        if (profileSnapshot.hasData && profileSnapshot.data!.exists) {
+          final data = profileSnapshot.data!.data() as Map<String, dynamic>;
+
+          if (data.containsKey('name') &&
+              data['name'] != null &&
+              data['name'].toString().isNotEmpty) {
+            bool isPremium = data['isPremium'] ?? false;
+
+            return ChatScreen(
+              studentName: data['name'],
+              interests: data['interests'] ?? '',
+              schoolType: data['school'] ?? '',
+              isPremium: isPremium,
+            );
+          }
+        }
+
+        return const OnboardingScreen();
       },
     );
   }
